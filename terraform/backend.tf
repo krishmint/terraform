@@ -2,9 +2,9 @@
 terraform {
   backend "s3" {
     # Configure these values according to your setup
-    bucket = "your-terraform-state-bucket"
-    key    = "infrastructure/terraform.tfstate"
-    region = "us-west-2"
+    bucket = "rohitsbucket232"
+    key    = "rohit.tfstate"
+    region = "us-east-1"
     
     # Encryption at rest
     encrypt = true

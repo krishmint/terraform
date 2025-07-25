@@ -85,23 +85,30 @@ output "admin_users" {
   value       = module.iam.admin_users
 }
 
+output "subnet_id" {
+  description = "ID of the first public subnet"
+  value       = module.vpc.public_subnet_ids[0]
+}
+
+
 # CloudTrail Outputs
-output "cloudtrail_arn" {
-  description = "ARN of the CloudTrail"
-  value       = module.cloudtrail.cloudtrail_arn
-}
+#output "cloudtrail_arn" {
+#  description = "ARN of the CloudTrail"
+#  value       = module.cloudtrail.cloudtrail_arn
+#}
 
-output "cloudtrail_s3_bucket" {
-  description = "S3 bucket name for CloudTrail logs"
-  value       = module.cloudtrail.s3_bucket_name
-}
+#output "cloudtrail_s3_bucket" {
+#  description = "S3 bucket name for CloudTrail logs"
+#  value       = module.cloudtrail.s3_bucket_name
+#}
 
-output "cloudtrail_log_group" {
-  description = "CloudWatch log group for CloudTrail"
-  value       = module.cloudtrail.cloudwatch_log_group_name
-}
+#output "cloudtrail_log_group" {
+#  description = "CloudWatch log group for CloudTrail"
+#  value       = module.cloudtrail.cloudwatch_log_group_name
+#}
 
-output "session_tracking_table" {
-  description = "DynamoDB table for session tracking"
-  value       = module.cloudtrail.dynamodb_table_name
-}
+
+#output "session_tracking_table" {
+#  description = "DynamoDB table for session tracking"
+#  value       = module.cloudtrail.dynamodb_table_name
+#}

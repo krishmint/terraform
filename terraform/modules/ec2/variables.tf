@@ -69,7 +69,7 @@ variable "https_cidr_blocks" {
 variable "create_key_pair" {
   description = "Create a new key pair for SSH access"
   type        = bool
-  default     = true
+  default     = false
 }
 
 variable "public_key" {
@@ -81,7 +81,7 @@ variable "public_key" {
 variable "existing_key_pair_name" {
   description = "Name of existing key pair to use (required if create_key_pair is false)"
   type        = string
-  default     = ""
+  default     = "staging-webapp-keypair"
 }
 
 variable "create_elastic_ip" {

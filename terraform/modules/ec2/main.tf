@@ -19,22 +19,8 @@ data "aws_ami" "ubuntu" {
   }
 }
 
-# Key Pair for SSH access
-resource "aws_key_pair" "main" {
-  count = var.create_key_pair ? 1 : 0
-  
-  key_name   = "${local.name_prefix}-keypair"
-  public_key = var.public_key
-
-  tags = merge(var.tags, {
-    Name = "${local.name_prefix}-keypair"
-  })
-}
-
 # Data source for existing key pair
 data "aws_key_pair" "existing" {
-  count = var.create_key_pair ? 0 : 1
-  
   key_name = var.existing_key_pair_name
 }
 
@@ -108,10 +94,10 @@ locals {
 resource "aws_instance" "standalone" {
   ami           = data.aws_ami.ubuntu.id
   instance_type = var.instance_type
-  
-  # Use created or existing key pair
-  key_name = var.create_key_pair ? aws_key_pair.main[0].key_name : data.aws_key_pair.existing[0].key_name
-  
+
+  # Use existing key pair
+  key_name = data.aws_key_pair.existing.key_name
+
   # Network configuration
   subnet_id                   = var.subnet_id
   vpc_security_group_ids      = [aws_security_group.ec2_standalone.id]

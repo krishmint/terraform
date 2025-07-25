@@ -41,12 +41,12 @@ output "security_group_arn" {
 
 output "key_pair_name" {
   description = "Name of the key pair used"
-  value       = var.create_key_pair ? aws_key_pair.main[0].key_name : data.aws_key_pair.existing[0].key_name
+  value       = data.aws_key_pair.existing.key_name  # Removed [0]
 }
 
 output "key_pair_fingerprint" {
   description = "Fingerprint of the key pair"
-  value       = var.create_key_pair ? aws_key_pair.main[0].fingerprint : data.aws_key_pair.existing[0].fingerprint
+  value       = data.aws_key_pair.existing.fingerprint  # Removed [0]
 }
 
 output "elastic_ip" {

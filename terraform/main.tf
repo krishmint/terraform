@@ -110,14 +110,28 @@ module "waf" {
 }
 
 # CloudTrail Module
-module "cloudtrail" {
-  source = "./modules/cloudtrail"
+#module "cloudtrail" {
+#  source = "./modules/cloudtrail"
   
-  environment             = var.environment
-  project_name            = var.project_name
-  log_retention_days      = var.cloudtrail_log_retention_days
-  force_destroy_bucket    = var.force_destroy_cloudtrail_bucket
-  enable_session_tracking = var.enable_session_tracking
+#  environment             = var.environment
+#  project_name            = var.project_name
+#  log_retention_days      = var.cloudtrail_log_retention_days
+#  force_destroy_bucket    = var.force_destroy_cloudtrail_bucket
+#  enable_session_tracking = var.enable_session_tracking
   
+#  tags = local.common_tags
+#}
+
+# EC2 Instance
+module "EC2" {
+  source = "./modules/ec2"
+
+  environment  = var.environment
+  project_name = var.project_name
+  vpc_id       = module.vpc.vpc_id
+  subnet_id    = module.vpc.public_subnet_ids[0]
+  instance_profile_name  = module.iam.instance_profile_name
+
   tags = local.common_tags
 }
+
