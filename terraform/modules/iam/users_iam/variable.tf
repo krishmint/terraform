@@ -1,4 +1,3 @@
-# IAM Module Variables
 variable "environment" {
   description = "Environment name"
   type        = string
@@ -34,7 +33,6 @@ variable "admin_users" {
 }
 
 variable "create_access_keys" {
-  description = "Create access keys for users (for programmatic access)"
-  type        = bool
-  default     = false
+  type    = bool
+  default = true
 }

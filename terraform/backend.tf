@@ -5,10 +5,10 @@ terraform {
     bucket = "rohitsbucket232"
     key    = "rohit.tfstate"
     region = "us-east-1"
-    
+
     # Encryption at rest
     encrypt = true
-    
+
     # Note: DynamoDB table for state locking is intentionally omitted
     # as per requirements
   }

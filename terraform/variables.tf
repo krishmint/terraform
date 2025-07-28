@@ -144,3 +144,31 @@ variable "enable_session_tracking" {
   type        = bool
   default     = true
 }
+
+# backup variables
+variable "backup_key" {
+  type    = string
+  default = "backup"
+}
+
+variable "backup_value" {
+  type    = string
+  default = "true"
+}
+
+variable "aws_backup_role_name" {
+  type = string
+}
+
+variable "vault_name" {
+  type = string
+}
+
+variable "vault_tags" {
+  type = map(string)
+}
+
+variable "backup_plan_name" {
+  type    = string
+  default = "asg-backup-plan"
+}

@@ -29,16 +29,6 @@ output "web_security_group_id" {
   value       = module.security_group.web_security_group_id
 }
 
-output "instance_profile_name" {
-  description = "Name of the IAM instance profile"
-  value       = module.iam.instance_profile_name
-}
-
-output "instance_role_arn" {
-  description = "ARN of the IAM instance role"
-  value       = module.iam.instance_role_arn
-}
-
 output "autoscaling_group_name" {
   description = "Name of the Auto Scaling Group"
   value       = module.autoscaling.autoscaling_group_name
@@ -69,22 +59,6 @@ output "waf_web_acl_arn" {
   value       = var.enable_waf ? module.waf[0].web_acl_arn : null
 }
 
-# IAM Users Outputs
-output "developer_users" {
-  description = "List of developer user names"
-  value       = module.iam.developer_users
-}
-
-output "devops_users" {
-  description = "List of DevOps user names"
-  value       = module.iam.devops_users
-}
-
-output "admin_users" {
-  description = "List of admin user names"
-  value       = module.iam.admin_users
-}
-
 output "subnet_id" {
   description = "ID of the first public subnet"
   value       = module.vpc.public_subnet_ids[0]
@@ -112,3 +86,24 @@ output "subnet_id" {
 #  description = "DynamoDB table for session tracking"
 #  value       = module.cloudtrail.dynamodb_table_name
 #}
+
+output "instance_profile_name" {
+  value = module.ec2_iam.instance_profile_name
+}
+
+output "instance_role_arn" {
+  value = module.ec2_iam.instance_role_arn
+}
+
+# IAM Users Outputs
+output "developer_users" {
+  value = module.users_iam.developer_users
+}
+
+output "devops_users" {
+  value = module.users_iam.devops_users
+}
+
+output "admin_users" {
+  value = module.users_iam.admin_users
+}
