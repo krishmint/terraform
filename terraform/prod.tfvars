@@ -1,6 +1,6 @@
 # Environment-specific configuration
 aws_region   = "us-east-1"
-environment  = "dev"
+environment  = "prod"
 project_name = "terraform"
 
 # Virtual Network Configuration
