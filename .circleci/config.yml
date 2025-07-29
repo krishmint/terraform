@@ -3,7 +3,7 @@ version: 2.1
 jobs:
   terraform-check:
     docker:
-      - image: cimg/base:stable  # Small, clean image
+      - image: cimg/base:stable
 
     steps:
       - checkout
@@ -31,7 +31,7 @@ jobs:
             echo "Checking AWS identity..."
             aws sts get-caller-identity
           environment:
-            AWS_DEFAULT_REGION: us-east-1  # Replace if using a different region
+            AWS_DEFAULT_REGION: us-east-1
 
       - run:
           name: Terraform Init
@@ -46,8 +46,20 @@ jobs:
             AWS_DEFAULT_REGION: us-east-1
 
       - run:
-          name: Terraform Plan
-          command: terraform -chdir=terraform plan
+          name: Terraform Plan (auto-detect branch)
+          command: |
+            BRANCH_NAME=$(echo "${CIRCLE_BRANCH}" | tr '[:upper:]' '[:lower:]')
+            TFVARS_FILE="${BRANCH_NAME}.tfvars"
+
+            echo "Branch detected: $BRANCH_NAME"
+            echo "Using tfvars file: $TFVARS_FILE"
+
+            if [ ! -f "terraform/${TFVARS_FILE}" ]; then
+              echo "ERROR: tfvars file 'terraform/${TFVARS_FILE}' not found."
+              exit 1
+            fi
+
+            terraform -chdir=terraform plan -var-file="$TFVARS_FILE"
           environment:
             AWS_DEFAULT_REGION: us-east-1
 
