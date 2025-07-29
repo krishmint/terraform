@@ -3,7 +3,7 @@ version: 2.1
 jobs:
   terraform-check:
     docker:
-      - image: cimg/python:3.11  # Includes curl, unzip, and AWS CLI
+      - image: cimg/base:stable  # Small, clean image
 
     steps:
       - checkout
@@ -18,12 +18,20 @@ jobs:
             terraform -version
 
       - run:
+          name: Install AWS CLI
+          command: |
+            curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
+            unzip awscliv2.zip
+            sudo ./aws/install
+            aws --version
+
+      - run:
           name: Confirm AWS Credentials
           command: |
             echo "Checking AWS identity..."
             aws sts get-caller-identity
           environment:
-            AWS_DEFAULT_REGION: us-east-1  # or your actual region
+            AWS_DEFAULT_REGION: us-east-1  # Replace if using a different region
 
       - run:
           name: Terraform Init
