@@ -1,25 +1,21 @@
 version: 2.1
 
-orbs:
-  terraform: circleci/terraform@3.2.1
-
 jobs:
   terraform-check:
     docker:
-      - image: cimg/base:stable  # Use a base image with curl and unzip
+      - image: cimg/base:stable  # Includes curl, unzip, etc.
 
     steps:
       - checkout
 
-    - run:
-        name: Install Terraform 1.8.3
-        command: |
-          curl -sLo terraform.zip https://releases.hashicorp.com/terraform/1.8.3/terraform_1.8.3_linux_amd64.zip
-          mkdir -p tf-bin
-          unzip terraform.zip -d tf-bin
-          sudo mv -f tf-bin/terraform /usr/local/bin/
-          terraform -version
-
+      - run:
+          name: Install Terraform 1.8.3
+          command: |
+            curl -sLo terraform.zip https://releases.hashicorp.com/terraform/1.8.3/terraform_1.8.3_linux_amd64.zip
+            mkdir -p tf-bin
+            unzip terraform.zip -d tf-bin
+            sudo mv -f tf-bin/terraform /usr/local/bin/
+            terraform -version
 
       - run:
           name: Terraform Init
