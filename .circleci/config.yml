@@ -15,8 +15,8 @@ jobs:
           name: Install Terraform 1.8.3
           command: |
             curl -sLo terraform.zip https://releases.hashicorp.com/terraform/1.8.3/terraform_1.8.3_linux_amd64.zip
-            unzip terraform.zip
-            sudo mv terraform /usr/local/bin/
+            unzip -o terraform.zip
+            sudo mv -f terraform /usr/local/bin/
             terraform -version
 
       - run:
