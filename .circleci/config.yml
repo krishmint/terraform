@@ -3,7 +3,7 @@ version: 2.1
 jobs:
   terraform-check:
     docker:
-      - image: cimg/base:stable  # Includes curl, unzip, etc.
+      - image: cimg/base:stable  # CircleCI image with curl, unzip, sudo
 
     steps:
       - checkout
@@ -16,6 +16,14 @@ jobs:
             unzip terraform.zip -d tf-bin
             sudo mv -f tf-bin/terraform /usr/local/bin/
             terraform -version
+
+      - run:
+          name: Confirm AWS Credentials
+          command: |
+            echo "Checking AWS identity..."
+            aws sts get-caller-identity || echo "AWS credentials are not working"
+          environment:
+            AWS_DEFAULT_REGION: us-east-1  # Set your region if not in .tf file
 
       - run:
           name: Terraform Init
