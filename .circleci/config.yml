@@ -63,25 +63,16 @@ jobs:
           environment:
             AWS_DEFAULT_REGION: us-east-1
             
-      - run:
-          name: Terraform apply (auto-detect branch)
-          command: |
-            BRANCH_NAME=$(echo "${CIRCLE_BRANCH}" | tr '[:upper:]' '[:lower:]')
-            TFVARS_FILE="${BRANCH_NAME}.tfvars"
 
-            echo "Branch detected: $BRANCH_NAME"
-            echo "Using tfvars file: $TFVARS_FILE"
-
-            if [ ! -f "terraform/${TFVARS_FILE}" ]; then
-              echo "ERROR: tfvars file 'terraform/${TFVARS_FILE}' not found."
-              exit 1
-            fi
-
-            terraform -chdir=terraform plan -var-file="$TFVARS_FILE"
-          environment:
-            AWS_DEFAULT_REGION: us-east-1
 
 workflows:
   terraform-validate-and-plan:
     jobs:
       - terraform-check
+      - terraform-apply:
+          requires:
+            - terraform-check
+          filters:
+            branches:
+              only:
+                - dev
