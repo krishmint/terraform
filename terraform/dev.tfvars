@@ -5,7 +5,7 @@ project_name = "terraform"
 
 # Virtual Network Configuration
 vpc_cidr           = "192.168.0.0/16"
-availability_zones = ["us-west-2a", "us-west-2b", "us-west-2c"]
+availability_zones = ["us-east-1a", "us-east-1b", "us-east-1c"]
 public_subnets     = ["192.168.1.0/24", "192.168.2.0/24", "192.168.3.0/24"]
 private_subnets    = ["192.168.11.0/24", "192.168.12.0/24", "192.168.13.0/24"]
 enable_nat_gateway = true
