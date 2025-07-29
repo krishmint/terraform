@@ -3,7 +3,7 @@ terraform {
   backend "s3" {
     # Configure these values according to your setup
     bucket = "infra-terraform-01"
-    key    = "${BRANCH_NAME}/circleci.tfstate"
+   
     region = "us-east-1"
 
     # Encryption at rest

@@ -32,10 +32,17 @@ jobs:
             AWS_DEFAULT_REGION: us-east-1
 
       - run:
-          name: Terraform Init
-          command: terraform -chdir=terraform init
-          environment:
-            AWS_DEFAULT_REGION: us-west-2
+          name: Terraform Init (dynamic backend key)
+          command: |
+            BRANCH_NAME=$(echo "${CIRCLE_BRANCH}" | tr '[:upper:]' '[:lower:]')
+            STATE_KEY="${BRANCH_NAME}/circleci.tfstate"
+
+            terraform -chdir=terraform init \
+              -backend-config="bucket=infra-terraform-01" \
+              -backend-config="region=us-east-1" \
+              -backend-config="encrypt=true" \
+              -backend-config="key=${STATE_KEY}"
+
 
       - run:
           name: Terraform Validate
