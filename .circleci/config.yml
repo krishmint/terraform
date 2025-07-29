@@ -138,8 +138,20 @@ jobs:
 workflows:
   terraform-validate-and-plan:
     jobs:
-      - terraform-check
+      - terraform-check:
+          filters:
+            branches:
+              only:
+                - dev
+                - staging
+                - master
       - terraform-apply:
           requires:
             - terraform-check
+          filters:
+            branches:
+              only:
+                - dev
+                - staging
+                - master
 
