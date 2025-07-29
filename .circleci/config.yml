@@ -22,8 +22,3 @@ workflows:
   terraform-validate-and-plan:
     jobs:
       - terraform-check
-          filters:
-            branches:
-              only:
-                - master
-
