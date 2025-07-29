@@ -9,6 +9,9 @@ jobs:
     steps:
       - checkout
 
+      - terraform/install:
+          terraform-version: 1.8.3
+
       - terraform/init:
           path: terraform
 
