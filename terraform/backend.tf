@@ -2,8 +2,8 @@
 terraform {
   backend "s3" {
     # Configure these values according to your setup
-    bucket = "rohitsbucket232"
-    key    = "rohit.tfstate"
+    bucket = "infra-terraform-01"
+    key    = "staging-circleci.tfstate"
     region = "us-east-1"
 
     # Encryption at rest
