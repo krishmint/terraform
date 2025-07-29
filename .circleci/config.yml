@@ -6,10 +6,7 @@ jobs:
       - image: cimg/base:stable
     steps:
       - checkout
-    filters:
-            branches:
-              only: master
-              
+                
 
       - run:
           name: Install Terraform 1.8.3
