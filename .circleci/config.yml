@@ -11,13 +11,15 @@ jobs:
     steps:
       - checkout
 
-      - run:
-          name: Install Terraform 1.8.3
-          command: |
-            curl -sLo terraform.zip https://releases.hashicorp.com/terraform/1.8.3/terraform_1.8.3_linux_amd64.zip
-            unzip -o terraform.zip
-            sudo mv -f terraform /usr/local/bin/
-            terraform -version
+    - run:
+        name: Install Terraform 1.8.3
+        command: |
+          curl -sLo terraform.zip https://releases.hashicorp.com/terraform/1.8.3/terraform_1.8.3_linux_amd64.zip
+          mkdir -p tf-bin
+          unzip terraform.zip -d tf-bin
+          sudo mv -f tf-bin/terraform /usr/local/bin/
+          terraform -version
+
 
       - run:
           name: Terraform Init
