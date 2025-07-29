@@ -4,7 +4,6 @@ jobs:
   terraform-check:
     docker:
       - image: cimg/base:stable
-
     steps:
       - checkout
 
@@ -28,7 +27,6 @@ jobs:
       - run:
           name: Confirm AWS Credentials
           command: |
-            echo "Checking AWS identity..."
             aws sts get-caller-identity
           environment:
             AWS_DEFAULT_REGION: us-east-1
@@ -62,8 +60,60 @@ jobs:
             terraform -chdir=terraform plan -var-file="$TFVARS_FILE"
           environment:
             AWS_DEFAULT_REGION: us-west-2
-            
 
+  terraform-apply:
+    docker:
+      - image: cimg/base:stable
+    steps:
+      - checkout
+
+      - run:
+          name: Install Terraform 1.8.3
+          command: |
+            curl -sLo terraform.zip https://releases.hashicorp.com/terraform/1.8.3/terraform_1.8.3_linux_amd64.zip
+            mkdir -p tf-bin
+            unzip terraform.zip -d tf-bin
+            sudo mv -f tf-bin/terraform /usr/local/bin/
+            terraform -version
+
+      - run:
+          name: Install AWS CLI
+          command: |
+            curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
+            unzip awscliv2.zip
+            sudo ./aws/install
+            aws --version
+
+      - run:
+          name: Confirm AWS Credentials
+          command: |
+            aws sts get-caller-identity
+          environment:
+            AWS_DEFAULT_REGION: us-east-1
+
+      - run:
+          name: Terraform Apply (only on staging/prod)
+          command: |
+            BRANCH_NAME=$(echo "${CIRCLE_BRANCH}" | tr '[:upper:]' '[:lower:]')
+
+            if [ "$BRANCH_NAME" != "staging" ] && [ "$BRANCH_NAME" != "master" ] && [ "$BRANCH_NAME" != "dev" ]; then
+              echo "Terraform apply is only allowed on staging or prod branches. Skipping..."
+              exit 0
+            fi
+
+            TFVARS_FILE="${BRANCH_NAME}.tfvars"
+            echo "Branch detected: $BRANCH_NAME"
+            echo "Using tfvars file: $TFVARS_FILE"
+
+            if [ ! -f "terraform/${TFVARS_FILE}" ]; then
+              echo "ERROR: tfvars file 'terraform/${TFVARS_FILE}' not found."
+              exit 1
+            fi
+
+            terraform -chdir=terraform init
+            terraform -chdir=terraform apply -auto-approve -var-file="$TFVARS_FILE"
+          environment:
+            AWS_DEFAULT_REGION: us-east-1
 
 workflows:
   terraform-validate-and-plan:
@@ -72,7 +122,4 @@ workflows:
       - terraform-apply:
           requires:
             - terraform-check
-          filters:
-            branches:
-              only:
-                - dev
+
