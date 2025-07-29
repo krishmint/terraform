@@ -5,21 +5,31 @@ orbs:
 
 jobs:
   terraform-check:
-    executor: terraform/default
+    docker:
+      - image: cimg/base:stable  # Use a base image with curl and unzip
+
     steps:
       - checkout
 
-      - terraform/install:
-          terraform-version: 1.8.3 
+      - run:
+          name: Install Terraform 1.8.3
+          command: |
+            curl -sLo terraform.zip https://releases.hashicorp.com/terraform/1.8.3/terraform_1.8.3_linux_amd64.zip
+            unzip terraform.zip
+            sudo mv terraform /usr/local/bin/
+            terraform -version
 
-      - terraform/init:
-          path: terraform
+      - run:
+          name: Terraform Init
+          command: terraform -chdir=terraform init
 
-      - terraform/validate:
-          path: terraform
+      - run:
+          name: Terraform Validate
+          command: terraform -chdir=terraform validate
 
-      - terraform/plan:
-          path: terraform
+      - run:
+          name: Terraform Plan
+          command: terraform -chdir=terraform plan
 
 workflows:
   terraform-validate-and-plan:
