@@ -37,13 +37,13 @@ jobs:
           name: Terraform Init
           command: terraform -chdir=terraform init
           environment:
-            AWS_DEFAULT_REGION: us-east-1
+            AWS_DEFAULT_REGION: us-west-2
 
       - run:
           name: Terraform Validate
           command: terraform -chdir=terraform validate
           environment:
-            AWS_DEFAULT_REGION: us-east-1
+            AWS_DEFAULT_REGION: us-west-2
 
       - run:
           name: Terraform Plan (auto-detect branch)
@@ -61,7 +61,7 @@ jobs:
 
             terraform -chdir=terraform plan -var-file="$TFVARS_FILE"
           environment:
-            AWS_DEFAULT_REGION: us-east-1
+            AWS_DEFAULT_REGION: us-west-2
             
 
 
