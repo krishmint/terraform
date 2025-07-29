@@ -3,7 +3,7 @@ version: 2.1
 jobs:
   terraform-check:
     docker:
-      - image: cimg/base:stable  # CircleCI image with curl, unzip, sudo
+      - image: cimg/python:3.11  # Includes curl, unzip, and AWS CLI
 
     steps:
       - checkout
@@ -21,21 +21,27 @@ jobs:
           name: Confirm AWS Credentials
           command: |
             echo "Checking AWS identity..."
-            aws sts get-caller-identity || echo "AWS credentials are not working"
+            aws sts get-caller-identity
           environment:
-            AWS_DEFAULT_REGION: us-east-1  # Set your region if not in .tf file
+            AWS_DEFAULT_REGION: us-east-1  # or your actual region
 
       - run:
           name: Terraform Init
           command: terraform -chdir=terraform init
+          environment:
+            AWS_DEFAULT_REGION: us-east-1
 
       - run:
           name: Terraform Validate
           command: terraform -chdir=terraform validate
+          environment:
+            AWS_DEFAULT_REGION: us-east-1
 
       - run:
           name: Terraform Plan
           command: terraform -chdir=terraform plan
+          environment:
+            AWS_DEFAULT_REGION: us-east-1
 
 workflows:
   terraform-validate-and-plan:
