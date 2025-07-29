@@ -1,1 +1,34 @@
-h
+version: 2.1
+
+orbs:
+  terraform: circleci/terraform@2.0 # Using the CircleCI Terraform Orb for common commands
+
+jobs:
+  plan:
+    executor: terraform/default # Using the orb's default executor
+    steps:
+      - checkout
+      - terraform/init
+      - terraform/plan
+
+  apply:
+    executor: terraform/default
+    steps:
+      - checkout
+      - terraform/init
+      - terraform/apply
+
+workflows:
+  version: 2
+  terraform_pipeline:
+    jobs:
+      - plan:
+          filters:
+            branches:
+              ignore: main # Run plan on all branches except main
+      - apply:
+          requires:
+            - plan # Apply only after a successful plan
+          filters:
+            branches:
+              only: main # Apply only on the main branch
