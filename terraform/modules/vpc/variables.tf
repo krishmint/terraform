@@ -1,11 +1,5 @@
-# VPC Module Variables
-variable "environment" {
-  description = "Environment name"
-  type        = string
-}
-
-variable "project_name" {
-  description = "Project name"
+variable "name_prefix" {
+  description = "Prefix for naming resources"
   type        = string
 }
 
@@ -19,14 +13,31 @@ variable "availability_zones" {
   type        = list(string)
 }
 
-variable "public_subnets" {
-  description = "List of public subnet CIDR blocks"
+variable "public_subnet_cidrs" {
+  description = "CIDR blocks for public subnets"
   type        = list(string)
 }
 
-variable "private_subnets" {
-  description = "List of private subnet CIDR blocks"
+variable "private_subnet_cidrs" {
+  description = "CIDR blocks for private subnets"
   type        = list(string)
+}
+
+variable "database_subnet_cidrs" {
+  description = "CIDR blocks for database subnets"
+  type        = list(string)
+}
+
+variable "enable_dns_hostnames" {
+  description = "Enable DNS hostnames in VPC"
+  type        = bool
+  default     = true
+}
+
+variable "enable_dns_support" {
+  description = "Enable DNS support in VPC"
+  type        = bool
+  default     = true
 }
 
 variable "enable_nat_gateway" {
@@ -35,8 +46,14 @@ variable "enable_nat_gateway" {
   default     = true
 }
 
+variable "single_nat_gateway" {
+  description = "Use single NAT Gateway for all private subnets"
+  type        = bool
+  default     = false
+}
+
 variable "tags" {
-  description = "A map of tags to assign to the resource"
+  description = "Tags to apply to resources"
   type        = map(string)
   default     = {}
 }

@@ -1,30 +1,36 @@
-# Security Group Module Outputs
-output "web_security_group_id" {
-  description = "ID of the web security group"
-  value       = aws_security_group.web.id
+variable "name_prefix" {
+  description = "Prefix for naming resources"
+  type        = string
 }
 
-output "web_security_group_arn" {
-  description = "ARN of the web security group"
-  value       = aws_security_group.web.arn
+variable "vpc_id" {
+  description = "VPC ID where security groups will be created"
+  type        = string
 }
 
-output "alb_security_group_id" {
-  description = "ID of the ALB security group"
-  value       = aws_security_group.alb.id
+variable "rules" {
+  description = "Security group rules configuration"
+  type = map(object({
+    description = string
+    ingress_rules = list(object({
+      from_port   = number
+      to_port     = number
+      protocol    = string
+      cidr_blocks = list(string)
+      description = string
+    }))
+    egress_rules = list(object({
+      from_port   = number
+      to_port     = number
+      protocol    = string
+      cidr_blocks = list(string)
+      description = string
+    }))
+  }))
 }
 
-output "alb_security_group_arn" {
-  description = "ARN of the ALB security group"
-  value       = aws_security_group.alb.arn
-}
-
-output "database_security_group_id" {
-  description = "ID of the database security group"
-  value       = aws_security_group.database.id
-}
-
-output "database_security_group_arn" {
-  description = "ARN of the database security group"
-  value       = aws_security_group.database.arn
+variable "tags" {
+  description = "Tags to apply to resources"
+  type        = map(string)
+  default     = {}
 }

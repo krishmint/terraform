@@ -1,82 +1,75 @@
-# Load Balancer Module - main.tf
-locals {
-  name_prefix = "${var.environment}-${var.project_name}"
-}
-
 # Application Load Balancer
 resource "aws_lb" "main" {
-  name               = "${local.name_prefix}-alb"
-  internal           = false
-  load_balancer_type = "application"
+  name               = "${var.name_prefix}-alb"
+  load_balancer_type = var.load_balancer_type
+  scheme             = var.scheme
   security_groups    = var.security_group_ids
-  subnets            = var.public_subnet_ids
+  subnets            = var.subnet_ids
 
-  enable_deletion_protection = var.enable_deletion_protection
+  enable_deletion_protection       = var.enable_deletion_protection
+  idle_timeout                    = var.idle_timeout
+  enable_http2                    = var.enable_http2
+  enable_cross_zone_load_balancing = var.enable_cross_zone_load_balancing
 
-  tags = merge(var.tags, {
-    Name = "${local.name_prefix}-alb"
-  })
+  access_logs {
+    bucket  = var.access_logs_bucket != null ? var.access_logs_bucket : null
+    prefix  = var.access_logs_prefix
+    enabled = var.access_logs_bucket != null
+  }
+
+  lifecycle {
+    prevent_destroy = true
+  }
+
+  tags = merge(
+    var.tags,
+    {
+      Name = "${var.name_prefix}-alb"
+    }
+  )
 }
 
-# Target Group for HTTP traffic
-resource "aws_lb_target_group" "web" {
-  name     = "${local.name_prefix}-web-tg"
-  port     = 80
-  protocol = "HTTP"
+# Target Group
+resource "aws_lb_target_group" "main" {
+  name     = "${var.name_prefix}-tg"
+  port     = var.target_group_port
+  protocol = var.target_group_protocol
   vpc_id   = var.vpc_id
 
   health_check {
     enabled             = true
-    healthy_threshold   = 2
-    interval            = 30
-    matcher             = "200"
+    healthy_threshold   = var.health_check_healthy_threshold
+    interval            = var.health_check_interval
+    matcher             = var.health_check_matcher
     path                = var.health_check_path
     port                = "traffic-port"
-    protocol            = "HTTP"
-    timeout             = 5
-    unhealthy_threshold = 2
+    protocol            = var.target_group_protocol
+    timeout             = var.health_check_timeout
+    unhealthy_threshold = var.health_check_unhealthy_threshold
   }
 
-  tags = merge(var.tags, {
-    Name = "${local.name_prefix}-web-tg"
-  })
-}
-
-# HTTP Listener
-resource "aws_lb_listener" "web" {
-  load_balancer_arn = aws_lb.main.arn
-  port              = "80"
-  protocol          = "HTTP"
-
-  default_action {
-    type             = "forward"
-    target_group_arn = aws_lb_target_group.web.arn
+  stickiness {
+    type            = var.stickiness_type
+    cookie_duration = var.stickiness_cookie_duration
+    enabled         = var.stickiness_enabled
   }
 
-  tags = var.tags
-}
-
-# HTTPS Listener (optional - requires SSL certificate)
-resource "aws_lb_listener" "web_https" {
-  count = var.ssl_certificate_arn != "" ? 1 : 0
-
-  load_balancer_arn = aws_lb.main.arn
-  port              = "443"
-  protocol          = "HTTPS"
-  ssl_policy        = "ELBSecurityPolicy-TLS-1-2-2017-01"
-  certificate_arn   = var.ssl_certificate_arn
-
-  default_action {
-    type             = "forward"
-    target_group_arn = aws_lb_target_group.web.arn
+  lifecycle {
+    prevent_destroy       = true
+    create_before_destroy = true
   }
 
-  tags = var.tags
+  tags = merge(
+    var.tags,
+    {
+      Name = "${var.name_prefix}-tg"
+    }
+  )
 }
 
-# HTTP to HTTPS redirect (when HTTPS is enabled)
-resource "aws_lb_listener" "web_http_redirect" {
-  count = var.ssl_certificate_arn != "" ? 1 : 0
+# HTTP Listener (redirect to HTTPS)
+resource "aws_lb_listener" "http" {
+  count = var.enable_http_listener ? 1 : 0
 
   load_balancer_arn = aws_lb.main.arn
   port              = "80"
@@ -90,6 +83,40 @@ resource "aws_lb_listener" "web_http_redirect" {
       protocol    = "HTTPS"
       status_code = "HTTP_301"
     }
+  }
+
+  tags = var.tags
+}
+
+# HTTPS Listener
+resource "aws_lb_listener" "https" {
+  count = var.enable_https_listener ? 1 : 0
+
+  load_balancer_arn = aws_lb.main.arn
+  port              = "443"
+  protocol          = "HTTPS"
+  ssl_policy        = var.ssl_policy
+  certificate_arn   = var.certificate_arn
+
+  default_action {
+    type             = "forward"
+    target_group_arn = aws_lb_target_group.main.arn
+  }
+
+  tags = var.tags
+}
+
+# HTTP-only Listener (for development/testing)
+resource "aws_lb_listener" "http_only" {
+  count = var.enable_http_only_listener ? 1 : 0
+
+  load_balancer_arn = aws_lb.main.arn
+  port              = "80"
+  protocol          = "HTTP"
+
+  default_action {
+    type             = "forward"
+    target_group_arn = aws_lb_target_group.main.arn
   }
 
   tags = var.tags
