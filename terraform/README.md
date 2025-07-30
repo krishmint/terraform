@@ -4,6 +4,8 @@ This Terraform configuration creates a complete AWS infrastructure with a modula
 
 ## Architecture Overview
 
+##GGG
+
 The infrastructure includes:
 - **VPC**: Custom VPC with public and private subnets across multiple AZs
 - **Security Groups**: Configurable security groups for web and database tiers
