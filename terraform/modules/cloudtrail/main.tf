@@ -3,7 +3,7 @@ resource "aws_s3_bucket" "cloudtrail_logs" {
   bucket = var.s3_bucket_name
 
   lifecycle {
-    prevent_destroy = true
+    prevent_destroy = false
   }
 
   tags = merge(
@@ -131,7 +131,7 @@ resource "aws_cloudtrail" "main" {
   }
 
   lifecycle {
-    prevent_destroy = true
+    prevent_destroy = false
   }
 
   tags = merge(

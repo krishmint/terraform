@@ -1,6 +1,3 @@
-# =============================================================================
-# MAIN TERRAFORM CONFIGURATION
-# =============================================================================
 
 locals {
   common_tags = merge(
@@ -16,17 +13,11 @@ locals {
   name_prefix = "${var.project_name}-${var.environment}"
 }
 
-# =============================================================================
-# DATA SOURCES
-# =============================================================================
 
 data "aws_caller_identity" "current" {}
 
 data "aws_region" "current" {}
 
-# =============================================================================
-# IAM MODULE
-# =============================================================================
 
 module "iam" {
   source = "./modules/iam"
@@ -36,9 +27,6 @@ module "iam" {
   tags         = local.common_tags
 }
 
-# =============================================================================
-# KEY PAIR MODULE
-# =============================================================================
 
 module "key_pair" {
   count  = var.enable_features.key_pair ? 1 : 0
@@ -52,9 +40,6 @@ module "key_pair" {
   tags           = local.common_tags
 }
 
-# =============================================================================
-# VPC MODULE
-# =============================================================================
 
 module "vpc" {
   count  = var.enable_features.vpc ? 1 : 0
@@ -73,9 +58,6 @@ module "vpc" {
   tags                    = local.common_tags
 }
 
-# =============================================================================
-# SECURITY GROUPS MODULE
-# =============================================================================
 
 module "security_groups" {
   count  = var.enable_features.vpc ? 1 : 0
@@ -87,9 +69,6 @@ module "security_groups" {
   tags        = local.common_tags
 }
 
-# =============================================================================
-# EC2 MODULE
-# =============================================================================
 
 module "ec2" {
   count  = var.enable_features.ec2 ? 1 : 0
@@ -99,7 +78,8 @@ module "ec2" {
   ami_id                   = var.ec2_config.ami_id
   instance_type            = var.ec2_config.instance_type
   key_name                 = var.enable_features.key_pair ? module.key_pair[0].key_name : null
-  subnet_id                = var.enable_features.vpc ? module.vpc[0].private_subnet_ids[0] : null
+  subnet_id                = var.enable_features.vpc ? module.vpc[0].public_subnet_ids[0] : null
+#  subnet_id 		   =  var.enable_features.vpc ? module.vpc[0].public_subnet_ids[0] : []
   vpc_security_group_ids   = var.enable_features.vpc ? [module.security_groups[0].security_group_ids["ec2"]] : []
   iam_instance_profile     = module.iam.ec2_instance_profile_name
   root_volume_size         = var.ec2_config.root_volume_size
@@ -111,9 +91,6 @@ module "ec2" {
   depends_on = [module.vpc, module.security_groups, module.iam]
 }
 
-# =============================================================================
-# AUTO SCALING MODULE
-# =============================================================================
 
 module "autoscaling" {
   count  = var.enable_features.autoscaling ? 1 : 0
@@ -143,9 +120,6 @@ module "autoscaling" {
   depends_on = [module.vpc, module.security_groups, module.iam, module.load_balancer]
 }
 
-# =============================================================================
-# LOAD BALANCER MODULE
-# =============================================================================
 
 module "load_balancer" {
   count  = var.enable_features.load_balancer ? 1 : 0
@@ -166,9 +140,6 @@ module "load_balancer" {
   depends_on = [module.vpc, module.security_groups]
 }
 
-# =============================================================================
-# RDS MODULE
-# =============================================================================
 
 module "rds" {
   count  = var.enable_features.rds ? 1 : 0
@@ -199,9 +170,6 @@ module "rds" {
   depends_on = [module.vpc, module.security_groups]
 }
 
-# =============================================================================
-# BACKUP MODULE
-# =============================================================================
 
 module "backup" {
   count  = var.enable_features.backup ? 1 : 0
@@ -218,33 +186,27 @@ module "backup" {
   depends_on = [module.iam]
 }
 
-# =============================================================================
-# CLOUDTRAIL MODULE
-# =============================================================================
 
-module "cloudtrail" {
-  count  = var.enable_features.cloudtrail ? 1 : 0
-  source = "./modules/cloudtrail"
+#module "cloudtrail" {
+#  count  = var.enable_features.cloudtrail ? 1 : 0
+#  source = "./modules/cloudtrail"
 
-  trail_name                           = var.cloudtrail_config.trail_name
-  s3_bucket_name                       = var.cloudtrail_config.s3_bucket_name
-  include_global_service_events        = var.cloudtrail_config.include_global_service_events
-  is_multi_region_trail               = var.cloudtrail_config.is_multi_region_trail
-  enable_logging                      = var.cloudtrail_config.enable_logging
-  enable_log_file_validation          = var.cloudtrail_config.enable_log_file_validation
-  event_selector_read_write_type      = var.cloudtrail_config.event_selector_read_write_type
-  event_selector_include_management_events = var.cloudtrail_config.event_selector_include_management_events
-  cloudtrail_role_arn                 = module.iam.cloudtrail_role_arn
-  project_name                        = var.project_name
-  environment                         = var.environment
-  tags                                = local.common_tags
+#  trail_name                           = var.cloudtrail_config.trail_name
+#  s3_bucket_name                       = var.cloudtrail_config.s3_bucket_name
+#  include_global_service_events        = var.cloudtrail_config.include_global_service_events
+#  is_multi_region_trail               = var.cloudtrail_config.is_multi_region_trail
+#  enable_logging                      = var.cloudtrail_config.enable_logging
+#  enable_log_file_validation          = var.cloudtrail_config.enable_log_file_validation
+#  event_selector_read_write_type      = var.cloudtrail_config.event_selector_read_write_type
+#  event_selector_include_management_events = var.cloudtrail_config.event_selector_include_management_events
+#  cloudtrail_role_arn                 = module.iam.cloudtrail_role_arn
+#  project_name                        = var.project_name
+#  environment                         = var.environment
+#  tags                                = local.common_tags
+#
+#  depends_on = [module.iam]
+#}
 
-  depends_on = [module.iam]
-}
-
-# =============================================================================
-# WAF MODULE
-# =============================================================================
 
 module "waf" {
   count  = var.enable_features.waf && var.enable_features.load_balancer ? 1 : 0

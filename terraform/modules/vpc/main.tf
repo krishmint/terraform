@@ -5,7 +5,7 @@ resource "aws_vpc" "main" {
   enable_dns_support   = var.enable_dns_support
 
   lifecycle {
-    prevent_destroy = true
+    prevent_destroy = false
   }
 
   tags = merge(
@@ -16,12 +16,66 @@ resource "aws_vpc" "main" {
   )
 }
 
+# CloudWatch Log Group for VPC Flow Logs
+resource "aws_cloudwatch_log_group" "vpc_flow_log" {
+  name              = "/aws/vpc/${var.name_prefix}-flow-log"
+  retention_in_days = 14
+
+  tags = var.tags
+}
+
+# IAM Role for Flow Logs
+resource "aws_iam_role" "vpc_flow_log" {
+  name = "${var.name_prefix}-flow-log-role"
+
+  assume_role_policy = jsonencode({
+    Version = "2012-10-17",
+    Statement = [{
+      Action    = "sts:AssumeRole",
+      Effect    = "Allow",
+      Principal = {
+        Service = "vpc-flow-logs.amazonaws.com"
+      }
+    }]
+  })
+
+  tags = var.tags
+}
+
+resource "aws_iam_role_policy" "vpc_flow_log" {
+  name = "${var.name_prefix}-flow-log-policy"
+  role = aws_iam_role.vpc_flow_log.id
+
+  policy = jsonencode({
+    Version = "2012-10-17",
+    Statement = [{
+      Effect   = "Allow",
+      Action   = [
+        "logs:CreateLogStream",
+        "logs:PutLogEvents"
+      ],
+      Resource = "${aws_cloudwatch_log_group.vpc_flow_log.arn}:*"
+    }]
+  })
+}
+
+# VPC Flow Log
+resource "aws_flow_log" "vpc" {
+  log_destination_type = "cloud-watch-logs"
+  log_group_name       = aws_cloudwatch_log_group.vpc_flow_log.name
+  iam_role_arn         = aws_iam_role.vpc_flow_log.arn
+  traffic_type         = "ALL"
+  vpc_id               = aws_vpc.main.id
+
+  tags = var.tags
+}
+
 # Internet Gateway
 resource "aws_internet_gateway" "main" {
   vpc_id = aws_vpc.main.id
 
   lifecycle {
-    prevent_destroy = true
+    prevent_destroy = false
   }
 
   tags = merge(
@@ -42,7 +96,7 @@ resource "aws_subnet" "public" {
   map_public_ip_on_launch = true
 
   lifecycle {
-    prevent_destroy = true
+    prevent_destroy = false
   }
 
   tags = merge(
@@ -63,7 +117,7 @@ resource "aws_subnet" "private" {
   availability_zone = var.availability_zones[count.index]
 
   lifecycle {
-    prevent_destroy = true
+    prevent_destroy = false
   }
 
   tags = merge(
@@ -84,7 +138,7 @@ resource "aws_subnet" "database" {
   availability_zone = var.availability_zones[count.index]
 
   lifecycle {
-    prevent_destroy = true
+    prevent_destroy = false
   }
 
   tags = merge(
@@ -103,7 +157,7 @@ resource "aws_eip" "nat" {
   domain = "vpc"
 
   lifecycle {
-    prevent_destroy = true
+    prevent_destroy = false
   }
 
   tags = merge(
@@ -124,7 +178,7 @@ resource "aws_nat_gateway" "main" {
   subnet_id     = aws_subnet.public[count.index].id
 
   lifecycle {
-    prevent_destroy = true
+    prevent_destroy = false
   }
 
   tags = merge(
@@ -147,7 +201,7 @@ resource "aws_route_table" "public" {
   }
 
   lifecycle {
-    prevent_destroy = true
+    prevent_destroy = false
   }
 
   tags = merge(
@@ -173,7 +227,7 @@ resource "aws_route_table" "private" {
   }
 
   lifecycle {
-    prevent_destroy = true
+    prevent_destroy = false
   }
 
   tags = merge(
@@ -189,7 +243,7 @@ resource "aws_route_table" "database" {
   vpc_id = aws_vpc.main.id
 
   lifecycle {
-    prevent_destroy = true
+    prevent_destroy = false
   }
 
   tags = merge(

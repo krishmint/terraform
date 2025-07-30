@@ -17,7 +17,7 @@ resource "aws_launch_template" "main" {
       volume_type           = var.root_volume_type
       volume_size           = var.root_volume_size
       encrypted             = var.root_volume_encrypted
-      delete_on_termination = true
+      delete_on_termination = false
     }
   }
 
@@ -28,7 +28,7 @@ resource "aws_launch_template" "main" {
   user_data = base64encode(var.user_data)
 
   lifecycle {
-    create_before_destroy = true
+    create_before_destroy = false
   }
 
   tag_specifications {
@@ -64,11 +64,11 @@ resource "aws_autoscaling_group" "main" {
     version = "$Latest"
   }
 
-  instance_warmup = var.instance_warmup
+#  instance_warmup = var.instance_warmup
 
   lifecycle {
-    prevent_destroy = true
-    create_before_destroy = true
+    prevent_destroy = false
+    create_before_destroy = false
     ignore_changes = [desired_capacity]
   }
 

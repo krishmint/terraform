@@ -29,8 +29,8 @@ resource "aws_security_group" "main" {
   }
 
   lifecycle {
-    prevent_destroy = true
-    create_before_destroy = true
+    prevent_destroy = false
+    create_before_destroy = false
   }
 
   tags = merge(

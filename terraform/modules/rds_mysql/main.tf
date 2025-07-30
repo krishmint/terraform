@@ -6,11 +6,11 @@ resource "random_password" "db_password" {
 
 # Store password in AWS Secrets Manager
 resource "aws_secretsmanager_secret" "db_password" {
-  name        = "${var.name_prefix}-rds-password"
+  name        = "${var.name_prefix}-rds-pass"
   description = "RDS MySQL password for ${var.name_prefix}"
 
   lifecycle {
-    prevent_destroy = true
+    prevent_destroy = false
   }
 
   tags = var.tags
@@ -18,10 +18,17 @@ resource "aws_secretsmanager_secret" "db_password" {
 
 resource "aws_secretsmanager_secret_version" "db_password" {
   secret_id     = aws_secretsmanager_secret.db_password.id
-  secret_string = random_password.db_password.result
+#  secret_string = random_password.db_password.result
+
+  secret_string = jsonencode({
+    username = var.username
+    password = random_password.db_password.result
+    endpoint = aws_db_instance.main.endpoint
+    port     = var.port
+  })
 
   lifecycle {
-    prevent_destroy = true
+    prevent_destroy = false
   }
 }
 
@@ -31,7 +38,7 @@ resource "aws_db_subnet_group" "main" {
   subnet_ids = var.subnet_group_subnet_ids
 
   lifecycle {
-    prevent_destroy = true
+    prevent_destroy = false
   }
 
   tags = merge(
@@ -82,7 +89,7 @@ resource "aws_db_parameter_group" "main" {
   }
 
   lifecycle {
-    prevent_destroy = true
+    prevent_destroy = false
   }
 
   tags = var.tags
@@ -96,7 +103,7 @@ resource "aws_db_option_group" "main" {
   major_engine_version = join(".", slice(split(".", var.engine_version), 0, 2))
 
   lifecycle {
-    prevent_destroy = true
+    prevent_destroy = false
   }
 
   tags = var.tags
@@ -159,7 +166,7 @@ resource "aws_db_instance" "main" {
   apply_immediately = var.apply_immediately
 
   lifecycle {
-    prevent_destroy = true
+    prevent_destroy = false
     ignore_changes = [
       password, # Password is managed by Secrets Manager
     ]
@@ -232,3 +239,30 @@ resource "aws_cloudwatch_log_group" "rds_general" {
 
   tags = var.tags
 }
+
+resource "aws_db_instance" "read_replica" {
+  count               = var.read_replica_count
+  identifier          = "${var.name_prefix}-mysql-replica-${count.index + 1}"
+  replicate_source_db = aws_db_instance.main.identifier
+  instance_class      = var.replica_instance_class
+  publicly_accessible = var.publicly_accessible
+  availability_zone   = var.read_replica_azs[count.index]
+  apply_immediately   = var.apply_immediately
+  skip_final_snapshot = true
+  # Optional Monitoring and Tags
+  monitoring_interval     = var.monitoring_interval
+  monitoring_role_arn     = var.monitoring_interval > 0 ? aws_iam_role.rds_monitoring[0].arn : null
+  auto_minor_version_upgrade = var.auto_minor_version_upgrade
+
+  tags = merge(
+    var.tags,
+    {
+      Name = "${var.name_prefix}-mysql-replica-${count.index + 1}"
+    }
+  )
+
+  depends_on = [
+    aws_db_instance.main
+  ]
+}
+

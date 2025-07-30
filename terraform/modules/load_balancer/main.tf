@@ -2,7 +2,7 @@
 resource "aws_lb" "main" {
   name               = "${var.name_prefix}-alb"
   load_balancer_type = var.load_balancer_type
-  scheme             = var.scheme
+#  scheme             = var.scheme
   security_groups    = var.security_group_ids
   subnets            = var.subnet_ids
 
@@ -11,14 +11,23 @@ resource "aws_lb" "main" {
   enable_http2                    = var.enable_http2
   enable_cross_zone_load_balancing = var.enable_cross_zone_load_balancing
 
-  access_logs {
-    bucket  = var.access_logs_bucket != null ? var.access_logs_bucket : null
-    prefix  = var.access_logs_prefix
-    enabled = var.access_logs_bucket != null
+#  access_logs {
+#    bucket  = var.access_logs_bucket != null ? var.access_logs_bucket : null
+#    prefix  = var.access_logs_prefix
+#    enabled = var.access_logs_bucket != null
+#  }
+
+  dynamic "access_logs" {
+    for_each = var.access_logs_bucket != null ? [1] : []
+    content {
+      bucket  = var.access_logs_bucket
+      prefix  = var.access_logs_prefix
+      enabled = true
+    }
   }
 
   lifecycle {
-    prevent_destroy = true
+    prevent_destroy = false
   }
 
   tags = merge(
@@ -55,8 +64,8 @@ resource "aws_lb_target_group" "main" {
   }
 
   lifecycle {
-    prevent_destroy       = true
-    create_before_destroy = true
+    prevent_destroy       = false
+    create_before_destroy = false
   }
 
   tags = merge(

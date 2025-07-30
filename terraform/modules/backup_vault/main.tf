@@ -4,7 +4,7 @@ resource "aws_kms_key" "backup" {
   deletion_window_in_days = 7
 
   lifecycle {
-    prevent_destroy = true
+    prevent_destroy = false
   }
 
   tags = merge(
@@ -26,7 +26,7 @@ resource "aws_backup_vault" "main" {
   kms_key_arn = aws_kms_key.backup.arn
 
   lifecycle {
-    prevent_destroy = true
+    prevent_destroy = false
   }
 
   tags = merge(
@@ -69,7 +69,7 @@ resource "aws_backup_plan" "main" {
   }
 
   lifecycle {
-    prevent_destroy = true
+    prevent_destroy = false
   }
 
   tags = merge(
@@ -104,13 +104,13 @@ resource "aws_backup_selection" "main" {
     "arn:aws:ec2:*:*:instance/*",
     "arn:aws:rds:*:*:db:*",
     "arn:aws:rds:*:*:cluster:*",
-    "arn:aws:efs:*:*:file-system/*",
+#    "arn:aws:efs:*:*:file-system/*",
     "arn:aws:fsx:*:*:file-system/*",
     "arn:aws:dynamodb:*:*:table/*"
   ]
 
   lifecycle {
-    prevent_destroy = true
+    prevent_destroy = false
   }
 }
 
@@ -132,10 +132,7 @@ resource "aws_backup_vault_policy" "main" {
           "backup:DeleteBackupVault",
           "backup:PutBackupVaultAccessPolicy",
           "backup:DeleteBackupVaultAccessPolicy",
-          "backup:GetBackupVaultAccessPolicy",
-          "backup:StartBackupJob",
-          "backup:GetBackupPlan",
-          "backup:GetBackupSelection"
+          "backup:GetBackupVaultAccessPolicy"
         ]
         Resource = "*"
       }

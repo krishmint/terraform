@@ -183,3 +183,17 @@ variable "tags" {
   type        = map(string)
   default     = {}
 }
+
+variable "read_replica_count" {
+  default = 1
+}
+
+variable "replica_instance_class" {
+  default = "db.t3.micro"
+}
+
+variable "read_replica_azs" {
+  type    = list(string)
+  default = ["us-west-2b"]
+}
+

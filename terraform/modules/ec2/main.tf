@@ -13,7 +13,7 @@ resource "aws_instance" "main" {
     volume_type           = var.root_volume_type
     volume_size           = var.root_volume_size
     encrypted             = var.root_volume_encrypted
-    delete_on_termination = true
+    delete_on_termination = false
 
     tags = merge(
       var.tags,
@@ -26,7 +26,7 @@ resource "aws_instance" "main" {
   user_data = var.user_data
 
   lifecycle {
-    prevent_destroy = true
+    prevent_destroy = false
     ignore_changes = [ami]
   }
 
@@ -46,7 +46,7 @@ resource "aws_eip" "main" {
   domain   = "vpc"
 
   lifecycle {
-    prevent_destroy = true
+    prevent_destroy = false
   }
 
   tags = merge(

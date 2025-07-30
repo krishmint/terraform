@@ -40,7 +40,7 @@ variable "iam_instance_profile" {
 variable "associate_public_ip_address" {
   description = "Associate a public IP address with the instance"
   type        = bool
-  default     = false
+  default     = true
 }
 
 variable "enable_detailed_monitoring" {

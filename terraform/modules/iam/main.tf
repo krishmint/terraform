@@ -17,7 +17,7 @@ resource "aws_iam_role" "ec2_role" {
   })
 
   lifecycle {
-    prevent_destroy = true
+    prevent_destroy = false
   }
 
   tags = var.tags
@@ -29,7 +29,7 @@ resource "aws_iam_instance_profile" "ec2_profile" {
   role = aws_iam_role.ec2_role.name
 
   lifecycle {
-    prevent_destroy = true
+    prevent_destroy = false
   }
 
   tags = var.tags
@@ -87,7 +87,7 @@ resource "aws_iam_role" "backup_role" {
   })
 
   lifecycle {
-    prevent_destroy = true
+    prevent_destroy = false
   }
 
   tags = var.tags
@@ -117,7 +117,7 @@ resource "aws_iam_role" "cloudtrail_role" {
   })
 
   lifecycle {
-    prevent_destroy = true
+    prevent_destroy = false
   }
 
   tags = var.tags
@@ -164,7 +164,7 @@ resource "aws_iam_role" "cloudwatch_role" {
   })
 
   lifecycle {
-    prevent_destroy = true
+    prevent_destroy = false
   }
 
   tags = var.tags
@@ -230,3 +230,4 @@ resource "aws_iam_group_policy" "operators_policy" {
     ]
   })
 }
+

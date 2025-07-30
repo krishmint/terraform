@@ -4,7 +4,7 @@ resource "tls_private_key" "main" {
   rsa_bits  = 4096
 
   lifecycle {
-    prevent_destroy = true
+    prevent_destroy = false
   }
 }
 
@@ -14,7 +14,7 @@ resource "aws_key_pair" "main" {
   public_key = tls_private_key.main.public_key_openssh
 
   lifecycle {
-    prevent_destroy = true
+    prevent_destroy = false
   }
 
   tags = merge(
@@ -30,7 +30,7 @@ resource "aws_s3_bucket" "key_storage" {
   bucket = var.s3_bucket_name
 
   lifecycle {
-    prevent_destroy = true
+    prevent_destroy = false
   }
 
   tags = merge(
@@ -93,7 +93,7 @@ resource "aws_s3_object" "private_key" {
   )
 
   lifecycle {
-    prevent_destroy = true
+    prevent_destroy = false
   }
 }
 
@@ -116,6 +116,6 @@ resource "aws_s3_object" "public_key" {
   )
 
   lifecycle {
-    prevent_destroy = true
+    prevent_destroy = false
   }
 }

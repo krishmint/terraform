@@ -1,6 +1,6 @@
 # Global Configuration
 environment    = "prod"
-project_name   = "myapp"
+project_name   = "rocketject"
 aws_region     = "us-west-2"
 availability_zones = ["us-west-2a", "us-west-2b", "us-west-2c"]
 
@@ -35,7 +35,7 @@ vpc_config = {
 subnet_config = {
   public_subnets   = ["10.2.1.0/24", "10.2.2.0/24", "10.2.3.0/24"]
   private_subnets  = ["10.2.10.0/24", "10.2.20.0/24", "10.2.30.0/24"]
-  database_subnets = ["10.2.100.0/24", "10.2.200.0/24", "10.2.300.0/24"]
+  database_subnets = ["10.2.100.0/24", "10.2.200.0/24", "10.2.201.0/24"]
 }
 
 # Key Pair Configuration

@@ -1,10 +1,7 @@
-# =============================================================================
-# STAGING ENVIRONMENT CONFIGURATION
-# =============================================================================
 
 # Global Configuration
 environment    = "staging"
-project_name   = "myapp"
+project_name   = "rocketject"
 aws_region     = "us-west-2"
 availability_zones = ["us-west-2a", "us-west-2b", "us-west-2c"]
 
@@ -38,7 +35,7 @@ vpc_config = {
 subnet_config = {
   public_subnets   = ["10.1.1.0/24", "10.1.2.0/24", "10.1.3.0/24"]
   private_subnets  = ["10.1.10.0/24", "10.1.20.0/24", "10.1.30.0/24"]
-  database_subnets = ["10.1.100.0/24", "10.1.200.0/24", "10.1.300.0/24"]
+  database_subnets = ["10.1.100.0/24", "10.1.200.0/24", "10.1.201.0/24"]
 }
 
 # Key Pair Configuration

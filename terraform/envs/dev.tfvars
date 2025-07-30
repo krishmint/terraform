@@ -1,5 +1,5 @@
 environment    = "dev"
-project_name   = "myapp"
+project_name   = "rocketscience"
 aws_region     = "us-west-2"
 availability_zones = ["us-west-2a", "us-west-2b", "us-west-2c"]
 
@@ -11,7 +11,7 @@ backend_region     = "us-west-2"
 # Default Tags
 default_tags = {
   Environment = "dev"
-  Project     = "myapp"
+  Project     = "rocketject"
   ManagedBy   = "Terraform"
   Owner       = "DevOps Team"
   CostCenter  = "Engineering"
@@ -33,7 +33,7 @@ vpc_config = {
 subnet_config = {
   public_subnets   = ["10.0.1.0/24", "10.0.2.0/24", "10.0.3.0/24"]
   private_subnets  = ["10.0.10.0/24", "10.0.20.0/24", "10.0.30.0/24"]
-  database_subnets = ["10.0.100.0/24", "10.0.200.0/24", "10.0.300.0/24"]
+  database_subnets = ["10.0.100.0/24", "10.0.200.0/24", "10.0.201.0/24"]
 }
 
 # Key Pair Configuration
@@ -47,7 +47,7 @@ key_pair_config = {
 # EC2 Configuration
 ec2_config = {
   instance_type               = "t3.micro"
-  ami_id                     = "ami-0c02fb55956c7d316" # Amazon Linux 2 AMI
+  ami_id                     = "ami-05f991c49d264708f" # Ubuntu 24.04
   root_volume_size           = 8
   root_volume_type           = "gp3"
   root_volume_encrypted      = true
@@ -143,7 +143,7 @@ security_group_rules = {
         from_port   = 22
         to_port     = 22
         protocol    = "tcp"
-        cidr_blocks = ["10.0.0.0/16"]
+        cidr_blocks = ["0.0.0.0/0"]
         description = "SSH from VPC"
       },
       {
@@ -250,11 +250,11 @@ cloudtrail_config = {
 enable_features = {
   vpc           = true
   ec2           = true
-  autoscaling   = true
-  load_balancer = true
-  rds           = true
-  backup        = true
-  cloudtrail    = true
-  waf           = true
+  autoscaling   = false
+  load_balancer = false
+  rds           = false
+  backup        = false
+  cloudtrail    = false
+  waf           = false
   key_pair      = true
 }

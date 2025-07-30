@@ -1,11 +1,10 @@
 # S3 Backend Configuration (No DynamoDB locking as requested)
 terraform {
   backend "s3" {
-    bucket         = var.backend_bucket_name
-    key            = var.backend_key
-    region         = var.backend_region
+    bucket         = "infra-terraform-01"
+    key            = "hello-world.tfstate"
+    region         = "us-east-1"
     encrypt        = true
-    versioning     = true
   }
 
   required_version = ">= 1.5"

@@ -135,12 +135,12 @@ output "waf_web_acl_arn" {
 }
 
 # CloudTrail Outputs
-output "cloudtrail_arn" {
-  description = "ARN of the CloudTrail"
-  value       = var.enable_features.cloudtrail ? module.cloudtrail[0].trail_arn : null
-}
+#output "cloudtrail_arn" {
+#  description = "ARN of the CloudTrail"
+#  value       = var.enable_features.cloudtrail ? module.cloudtrail[0].trail_arn : null
+#}
 
-output "cloudtrail_s3_bucket" {
-  description = "S3 bucket for CloudTrail logs"
-  value       = var.enable_features.cloudtrail ? module.cloudtrail[0].s3_bucket_name : null
-}
+#output "cloudtrail_s3_bucket" {
+#  description = "S3 bucket for CloudTrail logs"
+#  value       = var.enable_features.cloudtrail ? module.cloudtrail[0].s3_bucket_name : null
+#}
