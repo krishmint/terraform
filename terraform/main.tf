@@ -74,18 +74,38 @@ module "ec2" {
   count  = var.enable_features.ec2 ? 1 : 0
   source = "./modules/ec2"
 
-  name_prefix              = local.name_prefix
-  ami_id                   = var.ec2_config.ami_id
-  instance_type            = var.ec2_config.instance_type
-  key_name                 = var.enable_features.key_pair ? module.key_pair[0].key_name : null
-  subnet_id                = var.enable_features.vpc ? module.vpc[0].public_subnet_ids[0] : null
-#  subnet_id 		   =  var.enable_features.vpc ? module.vpc[0].public_subnet_ids[0] : []
-  vpc_security_group_ids   = var.enable_features.vpc ? [module.security_groups[0].security_group_ids["ec2"]] : []
-  iam_instance_profile     = module.iam.ec2_instance_profile_name
-  root_volume_size         = var.ec2_config.root_volume_size
-  root_volume_type         = var.ec2_config.root_volume_type
-  root_volume_encrypted    = var.ec2_config.root_volume_encrypted
-  enable_detailed_monitoring = var.ec2_config.enable_detailed_monitoring
+  ec2_configs = [
+    {
+      name_prefix                 = "app1"
+      ami_id                      = "ami-05f991c49d264708f"
+      instance_type               = "t2.micro"
+      key_name                    = var.enable_features.key_pair ? module.key_pair[0].key_name : null
+      subnet_id                   = var.enable_features.vpc ? module.vpc[0].public_subnet_ids[0] : null
+      vpc_security_group_ids      = var.enable_features.vpc ? [module.security_groups[0].security_group_ids["ec2"]] : []
+      iam_instance_profile        = module.iam.ec2_instance_profile_name
+      associate_public_ip_address = true
+      root_volume_size            = 8
+      root_volume_type            = "gp3"
+      root_volume_encrypted       = true
+      enable_detailed_monitoring  = false
+    }
+
+    {
+      name_prefix                 = "app1"
+      ami_id                      = "ami-05f991c49d264708f"
+      instance_type               = "t2.micro"
+      key_name                    = var.enable_features.key_pair ? module.key_pair[0].key_name : null
+      subnet_id                   = var.enable_features.vpc ? module.vpc[0].public_subnet_ids[0] : null
+      vpc_security_group_ids      = var.enable_features.vpc ? [module.security_groups[0].security_group_ids["ec2"]] : []
+      iam_instance_profile        = module.iam.ec2_instance_profile_name
+      associate_public_ip_address = true
+      root_volume_size            = 8
+      root_volume_type            = "gp3"
+      root_volume_encrypted       = true
+      enable_detailed_monitoring  = false
+    }
+  ]
+
   tags                     = local.common_tags
 
   depends_on = [module.vpc, module.security_groups, module.iam]

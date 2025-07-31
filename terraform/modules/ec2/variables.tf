@@ -1,40 +1,19 @@
-variable "name_prefix" {
-  description = "Prefix for naming resources"
-  type        = string
-}
-
-variable "ami_id" {
-  description = "AMI ID for the EC2 instance"
-  type        = string
-}
-
-variable "instance_type" {
-  description = "EC2 instance type"
-  type        = string
-  default     = "t3.micro"
-}
-
-variable "key_name" {
-  description = "Key pair name for SSH access"
-  type        = string
-  default     = null
-}
-
-variable "subnet_id" {
-  description = "Subnet ID where the instance will be launched"
-  type        = string
-}
-
-variable "vpc_security_group_ids" {
-  description = "List of VPC security group IDs"
-  type        = list(string)
-  default     = []
-}
-
-variable "iam_instance_profile" {
-  description = "IAM instance profile name"
-  type        = string
-  default     = null
+variable "ec2_configs" {
+  description = "List of EC2 instance configurations"
+  type        = list(object({
+    name_prefix                 = string
+    ami_id                      = string
+    instance_type               = string
+    key_name                    = string
+    subnet_id                   = string
+    vpc_security_group_ids      = list(string)
+    iam_instance_profile        = string
+    associate_public_ip_address = bool
+    root_volume_size            = number 
+    root_volume_type            = string
+    root_volume_encrypted       = bool
+    enable_detailed_monitoring  = bool
+  }))
 }
 
 variable "associate_public_ip_address" {

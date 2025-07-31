@@ -1,24 +1,26 @@
 # EC2 Instance
 resource "aws_instance" "main" {
-  ami                         = var.ami_id
-  instance_type               = var.instance_type
-  key_name                    = var.key_name
-  subnet_id                   = var.subnet_id
-  vpc_security_group_ids      = var.vpc_security_group_ids
-  iam_instance_profile        = var.iam_instance_profile
+  for_each                    = var.ec2_configs
+
+  ami                         = each.value.ami_id
+  instance_type               = each.value.instance_type
+  key_name                    = each.value.key_name
+  subnet_id                   = each.value.subnet_id
+  vpc_security_group_ids      = each.value.vpc_security_group_ids
+  iam_instance_profile        = each.value.iam_instance_profile
   associate_public_ip_address = var.associate_public_ip_address
   monitoring                  = var.enable_detailed_monitoring
 
   root_block_device {
-    volume_type           = var.root_volume_type
-    volume_size           = var.root_volume_size
-    encrypted             = var.root_volume_encrypted
-    delete_on_termination = false
+    volume_type               = each.value.root_volume_type
+    volume_size               = each.value.root_volume_size
+    encrypted                 = each.value.root_volume_encrypted
+    delete_on_termination     = false
 
     tags = merge(
       var.tags,
       {
-        Name = "${var.name_prefix}-root-volume"
+        Name = "{each.value.name_prefix}-root-volume"
       }
     )
   }
