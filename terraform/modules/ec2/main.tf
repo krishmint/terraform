@@ -8,8 +8,8 @@ resource "aws_instance" "main" {
   subnet_id                   = each.value.subnet_id
   vpc_security_group_ids      = each.value.vpc_security_group_ids
   iam_instance_profile        = each.value.iam_instance_profile
-  associate_public_ip_address = var.associate_public_ip_address
-  monitoring                  = var.enable_detailed_monitoring
+  associate_public_ip_address = each.value.associate_public_ip_address
+  monitoring                  = each.value.enable_detailed_monitoring
 
   root_block_device {
     volume_type               = each.value.root_volume_type
@@ -35,7 +35,7 @@ resource "aws_instance" "main" {
   tags = merge(
     var.tags,
     {
-      Name = "${var.name_prefix}-ec2"
+      Name = "{each.value.name_prefix}"
     }
   )
 }
@@ -44,7 +44,7 @@ resource "aws_instance" "main" {
 resource "aws_eip" "main" {
   count = var.create_eip ? 1 : 0
 
-  instance = aws_instance.main.id
+  instance = aws_instance.main.[each.key].id
   domain   = "vpc"
 
   lifecycle {

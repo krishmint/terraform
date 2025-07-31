@@ -4,8 +4,6 @@ locals {
     var.default_tags,
     var.additional_tags,
     {
-      Environment = var.environment
-      Project     = var.project_name
       Region      = var.aws_region
     }
   )
@@ -74,8 +72,8 @@ module "ec2" {
   count  = var.enable_features.ec2 ? 1 : 0
   source = "./modules/ec2"
 
-  ec2_configs = [
-    {
+  ec2_configs = {
+    app1 = {
       name_prefix                 = "app1"
       ami_id                      = "ami-05f991c49d264708f"
       instance_type               = "t2.micro"
@@ -88,9 +86,9 @@ module "ec2" {
       root_volume_type            = "gp3"
       root_volume_encrypted       = true
       enable_detailed_monitoring  = false
-    }
+    },
 
-    {
+    app2 = {
       name_prefix                 = "app1"
       ami_id                      = "ami-05f991c49d264708f"
       instance_type               = "t2.micro"
@@ -104,7 +102,7 @@ module "ec2" {
       root_volume_encrypted       = true
       enable_detailed_monitoring  = false
     }
-  ]
+  }
 
   tags                     = local.common_tags
 

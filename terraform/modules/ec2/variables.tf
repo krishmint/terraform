@@ -1,6 +1,7 @@
 variable "ec2_configs" {
   description = "List of EC2 instance configurations"
-  type        = list(object({
+
+  type                          = map(object({
     name_prefix                 = string
     ami_id                      = string
     instance_type               = string
@@ -16,35 +17,6 @@ variable "ec2_configs" {
   }))
 }
 
-variable "associate_public_ip_address" {
-  description = "Associate a public IP address with the instance"
-  type        = bool
-  default     = true
-}
-
-variable "enable_detailed_monitoring" {
-  description = "Enable detailed monitoring"
-  type        = bool
-  default     = false
-}
-
-variable "root_volume_type" {
-  description = "Root volume type"
-  type        = string
-  default     = "gp3"
-}
-
-variable "root_volume_size" {
-  description = "Root volume size in GB"
-  type        = number
-  default     = 8
-}
-
-variable "root_volume_encrypted" {
-  description = "Encrypt root volume"
-  type        = bool
-  default     = true
-}
 
 variable "user_data" {
   description = "User data script"
