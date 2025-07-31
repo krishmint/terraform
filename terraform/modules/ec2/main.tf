@@ -20,7 +20,7 @@ resource "aws_instance" "main" {
     tags = merge(
       var.tags,
       {
-        Name = "{each.value.name_prefix}-root-volume"
+        Name = "${each.key}-${var.name_prefix}-root-volume"
       }
     )
   }
@@ -35,7 +35,7 @@ resource "aws_instance" "main" {
   tags = merge(
     var.tags,
     {
-      Name = "{each.value.name_prefix}"
+      Name = "${each.key}-${var.name_prefix}"
     }
   )
 }
@@ -44,7 +44,7 @@ resource "aws_instance" "main" {
 resource "aws_eip" "main" {
   count = var.create_eip ? 1 : 0
 
-  instance = aws_instance.main.[each.key].id
+  instance = { for k, v in aws_instance.main : k => v.id }
   domain   = "vpc"
 
   lifecycle {

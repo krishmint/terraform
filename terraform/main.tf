@@ -72,8 +72,9 @@ module "ec2" {
   count  = var.enable_features.ec2 ? 1 : 0
   source = "./modules/ec2"
 
+  name_prefix                     = "eventpower.com"  
   ec2_configs = {
-    app1 = {
+    event-app = {
       name_prefix                 = "app1"
       ami_id                      = "ami-05f991c49d264708f"
       instance_type               = "t2.micro"
@@ -88,7 +89,7 @@ module "ec2" {
       enable_detailed_monitoring  = false
     },
 
-    app2 = {
+    ep-api = {
       name_prefix                 = "app1"
       ami_id                      = "ami-05f991c49d264708f"
       instance_type               = "t2.micro"
