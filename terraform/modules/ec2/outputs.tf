@@ -1,31 +1,31 @@
 output "instance_id" {
   description = "ID of the EC2 instance"
-  value       = aws_instance.main.[each.key].id
+  value       = { for k, v in aws_instance.main : k => v.id }
 }
 
 output "instance_arn" {
   description = "ARN of the EC2 instance"
-  value       = aws_instance.main.arn
+  value       = { for k, v in aws_instance.main : k => v.arn }
 }
 
 output "private_ip" {
   description = "Private IP address of the instance"
-  value       = aws_instance.main.private_ip
+  value       = { for k, v in aws_instance.main : k => v.private_ip }
 }
 
 output "public_ip" {
   description = "Public IP address of the instance"
-  value       = aws_instance.main.public_ip
+  value       = { for k, v in aws_instance.main : k => v.public_ip }
 }
 
 output "private_dns" {
   description = "Private DNS name of the instance"
-  value       = aws_instance.main.private_dns
+  value       = { for k, v in aws_instance.main : k => v.private_dns }
 }
 
 output "public_dns" {
   description = "Public DNS name of the instance"
-  value       = aws_instance.main.public_dns
+  value       = { for k, v in aws_instance.main : k => v.public_dns }
 }
 
 output "elastic_ip" {
@@ -35,5 +35,46 @@ output "elastic_ip" {
 
 output "availability_zone" {
   description = "Availability zone of the instance"
-  value       = aws_instance.main.availability_zone
+  value       = { for k, v in aws_instance.main : k => v.availability_zone }
 }
+
+
+#output "instance_id" {
+#  description = "ID of the EC2 instance"
+#  value       = aws_instance.main.id
+#}
+
+#output "instance_arn" {
+#  description = "ARN of the EC2 instance"
+#  value       = aws_instance.main.arn
+#}
+
+#output "private_ip" {
+#  description = "Private IP address of the instance"
+#  value       = aws_instance.main.private_ip
+#}
+
+#output "public_ip" {
+#  description = "Public IP address of the instance"
+#  value       = aws_instance.main.public_ip
+#}
+
+#output "private_dns" {
+#  description = "Private DNS name of the instance"
+#  value       = aws_instance.main.private_dns
+#}
+
+#output "public_dns" {
+#  description = "Public DNS name of the instance"
+#  value       = aws_instance.main.public_dns
+#}
+
+#output "elastic_ip" {
+#  description = "Elastic IP address (if created)"
+#  value       = var.create_eip ? aws_eip.main[0].public_ip : null
+#}
+
+#output "availability_zone" {
+#  description = "Availability zone of the instance"
+#  value       = aws_instance.main.availability_zone
+#}
