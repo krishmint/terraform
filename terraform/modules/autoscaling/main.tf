@@ -1,115 +1,79 @@
-# Auto Scaling Module - main.tf
-locals {
-  name_prefix = "${var.environment}-${var.project_name}"
-}
-
-# Data source for Ubuntu 22.04 LTS AMI
-data "aws_ami" "ubuntu" {
-  most_recent = true
-  owners      = ["099720109477"] # Canonical
-
-  filter {
-    name   = "name"
-    values = ["ubuntu/images/hvm-ssd/ubuntu-jammy-22.04-amd64-server-*"]
-  }
-
-  filter {
-    name   = "virtualization-type"
-    values = ["hvm"]
-  }
-}
-
-# User data script for instance initialization
-locals {
-  user_data = base64encode(templatefile("${path.module}/user_data.sh", {
-    environment  = var.environment
-    project_name = var.project_name
-  }))
-}
-
 # Launch Template
 resource "aws_launch_template" "main" {
-  name_prefix   = "${local.name_prefix}-lt-"
-  description   = "Launch template for ${local.name_prefix}"
-  image_id      = data.aws_ami.ubuntu.id
+  name_prefix   = "${var.name_prefix}-lt-"
+  image_id      = var.ami_id
   instance_type = var.instance_type
+  key_name      = var.key_name
 
   vpc_security_group_ids = var.security_group_ids
 
   iam_instance_profile {
-    name = var.instance_profile_name
+    name = var.iam_instance_profile
   }
 
-  user_data = local.user_data
+  block_device_mappings {
+    device_name = "/dev/xvda"
+    ebs {
+      volume_type           = var.root_volume_type
+      volume_size           = var.root_volume_size
+      encrypted             = var.root_volume_encrypted
+      delete_on_termination = false
+    }
+  }
 
-  # Enable detailed monitoring
   monitoring {
-    enabled = true
+    enabled = var.enable_detailed_monitoring
   }
 
-  # EBS optimization
-  ebs_optimized = true
+  user_data = base64encode(var.user_data)
 
-  # Instance metadata options
-  metadata_options {
-    http_endpoint = "enabled"
-    http_tokens   = "required"
-    http_put_response_hop_limit = 2
+  lifecycle {
+    create_before_destroy = false
   }
 
   tag_specifications {
     resource_type = "instance"
-    tags = merge(var.tags, {
-      Name = "${local.name_prefix}-instance"
-    })
+    tags = merge(
+      var.tags,
+      {
+        Name = "${var.name_prefix}-asg-instance"
+      }
+    )
   }
 
-  tag_specifications {
-    resource_type = "volume"
-    tags = merge(var.tags, {
-      Name = "${local.name_prefix}-volume"
-    })
-  }
-
-  tags = merge(var.tags, {
-    Name = "${local.name_prefix}-launch-template"
-  })
-
-  lifecycle {
-    create_before_destroy = true
-  }
+  tags = var.tags
 }
 
 # Auto Scaling Group
 resource "aws_autoscaling_group" "main" {
-  name                = "${local.name_prefix}-asg"
-  vpc_zone_identifier = var.private_subnet_ids
+  name                = "${var.name_prefix}-asg"
+  vpc_zone_identifier = var.subnet_ids
   target_group_arns   = var.target_group_arns
-  health_check_type   = "ELB"
-  health_check_grace_period = 300
+  health_check_type   = var.health_check_type
+  health_check_grace_period = var.health_check_grace_period
 
   min_size         = var.min_size
   max_size         = var.max_size
   desired_capacity = var.desired_capacity
+
+  default_cooldown = var.default_cooldown
+  enabled_metrics  = var.enabled_metrics
 
   launch_template {
     id      = aws_launch_template.main.id
     version = "$Latest"
   }
 
-  # Instance refresh configuration
-  instance_refresh {
-    strategy = "Rolling"
-    preferences {
-      min_healthy_percentage = 50
-    }
+#  instance_warmup = var.instance_warmup
+
+  lifecycle {
+    prevent_destroy = false
+    create_before_destroy = false
+    ignore_changes = [desired_capacity]
   }
 
-  # Tags
   dynamic "tag" {
-    for_each = merge(var.tags, {
-      Name = "${local.name_prefix}-asg-instance"
-    })
+    for_each = var.tags
     content {
       key                 = tag.key
       value               = tag.value
@@ -117,31 +81,33 @@ resource "aws_autoscaling_group" "main" {
     }
   }
 
-  lifecycle {
-    create_before_destroy = true
+  tag {
+    key                 = "Name"
+    value               = "${var.name_prefix}-asg"
+    propagate_at_launch = false
   }
 }
 
 # Auto Scaling Policies
 resource "aws_autoscaling_policy" "scale_up" {
-  name                   = "${local.name_prefix}-scale-up"
+  name                   = "${var.name_prefix}-scale-up"
   scaling_adjustment     = 1
   adjustment_type        = "ChangeInCapacity"
-  cooldown              = 300
+  cooldown               = 300
   autoscaling_group_name = aws_autoscaling_group.main.name
 }
 
 resource "aws_autoscaling_policy" "scale_down" {
-  name                   = "${local.name_prefix}-scale-down"
+  name                   = "${var.name_prefix}-scale-down"
   scaling_adjustment     = -1
   adjustment_type        = "ChangeInCapacity"
-  cooldown              = 300
+  cooldown               = 300
   autoscaling_group_name = aws_autoscaling_group.main.name
 }
 
 # CloudWatch Alarms
 resource "aws_cloudwatch_metric_alarm" "cpu_high" {
-  alarm_name          = "${local.name_prefix}-cpu-high"
+  alarm_name          = "${var.name_prefix}-cpu-high"
   comparison_operator = "GreaterThanThreshold"
   evaluation_periods  = "2"
   metric_name         = "CPUUtilization"
@@ -160,7 +126,7 @@ resource "aws_cloudwatch_metric_alarm" "cpu_high" {
 }
 
 resource "aws_cloudwatch_metric_alarm" "cpu_low" {
-  alarm_name          = "${local.name_prefix}-cpu-low"
+  alarm_name          = "${var.name_prefix}-cpu-low"
   comparison_operator = "LessThanThreshold"
   evaluation_periods  = "2"
   metric_name         = "CPUUtilization"

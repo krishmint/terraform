@@ -1,22 +1,18 @@
-# CloudTrail Module - main.tf
-locals {
-  name_prefix = "${var.environment}-${var.project_name}"
-}
-
 # S3 Bucket for CloudTrail logs
 resource "aws_s3_bucket" "cloudtrail_logs" {
-  bucket        = "${local.name_prefix}-cloudtrail-logs-${random_string.bucket_suffix.result}"
-  force_destroy = var.force_destroy_bucket
+  bucket = var.s3_bucket_name
 
-  tags = merge(var.tags, {
-    Name = "${local.name_prefix}-cloudtrail-logs"
-  })
-}
+  lifecycle {
+    prevent_destroy = false
+  }
 
-resource "random_string" "bucket_suffix" {
-  length  = 8
-  special = false
-  upper   = false
+  tags = merge(
+    var.tags,
+    {
+      Name    = var.s3_bucket_name
+      Purpose = "CloudTrail Logs"
+    }
+  )
 }
 
 # S3 Bucket versioning
@@ -35,6 +31,7 @@ resource "aws_s3_bucket_server_side_encryption_configuration" "cloudtrail_logs" 
     apply_server_side_encryption_by_default {
       sse_algorithm = "AES256"
     }
+    bucket_key_enabled = true
   }
 }
 
@@ -63,6 +60,11 @@ resource "aws_s3_bucket_policy" "cloudtrail_logs" {
         }
         Action   = "s3:GetBucketAcl"
         Resource = aws_s3_bucket.cloudtrail_logs.arn
+        Condition = {
+          StringEquals = {
+            "AWS:SourceArn" = "arn:aws:cloudtrail:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:trail/${var.trail_name}"
+          }
+        }
       },
       {
         Sid    = "AWSCloudTrailWrite"
@@ -75,6 +77,7 @@ resource "aws_s3_bucket_policy" "cloudtrail_logs" {
         Condition = {
           StringEquals = {
             "s3:x-amz-acl" = "bucket-owner-full-control"
+            "AWS:SourceArn" = "arn:aws:cloudtrail:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:trail/${var.trail_name}"
           }
         }
       }
@@ -82,70 +85,34 @@ resource "aws_s3_bucket_policy" "cloudtrail_logs" {
   })
 }
 
+# Data sources
+data "aws_caller_identity" "current" {}
+data "aws_region" "current" {}
+
 # CloudWatch Log Group for CloudTrail
 resource "aws_cloudwatch_log_group" "cloudtrail" {
-  name              = "/aws/cloudtrail/${local.name_prefix}"
+  name              = "/aws/cloudtrail/${var.trail_name}"
   retention_in_days = var.log_retention_days
-
-  tags = merge(var.tags, {
-    Name = "${local.name_prefix}-cloudtrail-logs"
-  })
-}
-
-# IAM Role for CloudTrail to write to CloudWatch Logs
-resource "aws_iam_role" "cloudtrail_logs_role" {
-  name = "${local.name_prefix}-cloudtrail-logs-role"
-
-  assume_role_policy = jsonencode({
-    Version = "2012-10-17"
-    Statement = [
-      {
-        Action = "sts:AssumeRole"
-        Effect = "Allow"
-        Principal = {
-          Service = "cloudtrail.amazonaws.com"
-        }
-      }
-    ]
-  })
 
   tags = var.tags
 }
 
-# IAM Policy for CloudTrail to write to CloudWatch Logs
-resource "aws_iam_role_policy" "cloudtrail_logs_policy" {
-  name = "${local.name_prefix}-cloudtrail-logs-policy"
-  role = aws_iam_role.cloudtrail_logs_role.id
-
-  policy = jsonencode({
-    Version = "2012-10-17"
-    Statement = [
-      {
-        Effect = "Allow"
-        Action = [
-          "logs:PutLogEvents",
-          "logs:CreateLogGroup",
-          "logs:CreateLogStream"
-        ]
-        Resource = "${aws_cloudwatch_log_group.cloudtrail.arn}:*"
-      }
-    ]
-  })
-}
-
 # CloudTrail
 resource "aws_cloudtrail" "main" {
-  name           = "${local.name_prefix}-cloudtrail"
-  s3_bucket_name = aws_s3_bucket.cloudtrail_logs.bucket
+  name           = var.trail_name
+  s3_bucket_name = aws_s3_bucket.cloudtrail_logs.id
 
-  # CloudWatch Logs integration
+  include_global_service_events = var.include_global_service_events
+  is_multi_region_trail        = var.is_multi_region_trail
+  enable_logging               = var.enable_logging
+  enable_log_file_validation   = var.enable_log_file_validation
+
   cloud_watch_logs_group_arn = "${aws_cloudwatch_log_group.cloudtrail.arn}:*"
-  cloud_watch_logs_role_arn  = aws_iam_role.cloudtrail_logs_role.arn
+  cloud_watch_logs_role_arn  = var.cloudtrail_role_arn
 
-  # Event selectors for comprehensive logging
   event_selector {
-    read_write_type                 = "All"
-    include_management_events       = true
+    read_write_type                 = var.event_selector_read_write_type
+    include_management_events       = var.event_selector_include_management_events
     exclude_management_event_sources = []
 
     data_resource {
@@ -154,180 +121,127 @@ resource "aws_cloudtrail" "main" {
     }
 
     data_resource {
-      type   = "AWS::S3::Bucket"
-      values = ["arn:aws:s3:::*"]
+      type   = "AWS::Lambda::Function"
+      values = ["arn:aws:lambda:*"]
     }
   }
 
-  # Advanced event selectors for detailed logging
-  advanced_event_selector {
-    name = "Log all management and data events"
-    field_selector {
-      field  = "eventCategory"
-      equals = ["Management", "Data"]
-    }
-  }
-
-  # Insight selectors for API call analysis
   insight_selector {
     insight_type = "ApiCallRateInsight"
   }
 
-  depends_on = [aws_s3_bucket_policy.cloudtrail_logs]
+  lifecycle {
+    prevent_destroy = false
+  }
 
-  tags = merge(var.tags, {
-    Name = "${local.name_prefix}-cloudtrail"
-  })
+  tags = merge(
+    var.tags,
+    {
+      Name = var.trail_name
+    }
+  )
+
+  depends_on = [
+    aws_s3_bucket_policy.cloudtrail_logs,
+    aws_cloudwatch_log_group.cloudtrail
+  ]
 }
 
-# DynamoDB table for session metadata (optional)
-resource "aws_dynamodb_table" "user_sessions" {
-  count = var.enable_session_tracking ? 1 : 0
-
-  name           = "${local.name_prefix}-user-sessions"
-  billing_mode   = "PAY_PER_REQUEST"
-  hash_key       = "username"
-  range_key      = "session_id"
-
-  attribute {
-    name = "username"
-    type = "S"
-  }
-
-  attribute {
-    name = "session_id"
-    type = "S"
-  }
-
-  attribute {
-    name = "login_time"
-    type = "S"
-  }
-
-  global_secondary_index {
-    name     = "LoginTimeIndex"
-    hash_key = "username"
-    range_key = "login_time"
-  }
-
-  ttl {
-    attribute_name = "ttl"
-    enabled        = true
-  }
-
-  tags = merge(var.tags, {
-    Name = "${local.name_prefix}-user-sessions"
-  })
+# CloudWatch Log Stream
+resource "aws_cloudwatch_log_stream" "cloudtrail" {
+  name           = "${var.trail_name}-log-stream"
+  log_group_name = aws_cloudwatch_log_group.cloudtrail.name
 }
 
-# Lambda function for processing CloudTrail logs (optional)
-resource "aws_lambda_function" "cloudtrail_processor" {
-  count = var.enable_session_tracking ? 1 : 0
+# S3 Bucket lifecycle configuration
+resource "aws_s3_bucket_lifecycle_configuration" "cloudtrail_logs" {
+  bucket = aws_s3_bucket.cloudtrail_logs.id
 
-  filename         = "cloudtrail_processor.zip"
-  function_name    = "${local.name_prefix}-cloudtrail-processor"
-  role            = aws_iam_role.lambda_role[0].arn
-  handler         = "index.handler"
-  runtime         = "python3.9"
-  timeout         = 60
+  rule {
+    id     = "cloudtrail_logs_lifecycle"
+    status = "Enabled"
 
-  source_code_hash = data.archive_file.lambda_zip[0].output_base64sha256
+    transition {
+      days          = 30
+      storage_class = "STANDARD_INFREQUENT_ACCESS"
+    }
 
-  environment {
-    variables = {
-      DYNAMODB_TABLE = aws_dynamodb_table.user_sessions[0].name
+    transition {
+      days          = 90
+      storage_class = "GLACIER"
+    }
+
+    transition {
+      days          = 365
+      storage_class = "DEEP_ARCHIVE"
+    }
+
+    expiration {
+      days = var.log_retention_days_s3
+    }
+
+    noncurrent_version_expiration {
+      noncurrent_days = 30
     }
   }
-
-  tags = var.tags
 }
 
-# Lambda deployment package
-data "archive_file" "lambda_zip" {
-  count = var.enable_session_tracking ? 1 : 0
+# CloudWatch Metric Filters (optional)
+resource "aws_cloudwatch_log_metric_filter" "console_login_failures" {
+  count          = var.enable_metric_filters ? 1 : 0
+  name           = "${var.trail_name}-console-login-failures"
+  log_group_name = aws_cloudwatch_log_group.cloudtrail.name
+  pattern        = "{ ($.errorCode = \"Failed authentication\") || ($.errorCode = \"No username found in supplied token\") }"
 
-  type        = "zip"
-  output_path = "cloudtrail_processor.zip"
-  source {
-    content = templatefile("${path.module}/lambda_function.py", {
-      dynamodb_table = var.enable_session_tracking ? aws_dynamodb_table.user_sessions[0].name : ""
-    })
-    filename = "index.py"
+  metric_transformation {
+    name      = "ConsoleLoginFailures"
+    namespace = "CloudTrailMetrics"
+    value     = "1"
   }
 }
 
-# IAM role for Lambda
-resource "aws_iam_role" "lambda_role" {
-  count = var.enable_session_tracking ? 1 : 0
+resource "aws_cloudwatch_log_metric_filter" "root_usage" {
+  count          = var.enable_metric_filters ? 1 : 0
+  name           = "${var.trail_name}-root-usage"
+  log_group_name = aws_cloudwatch_log_group.cloudtrail.name
+  pattern        = "{ $.userIdentity.type = \"Root\" && $.userIdentity.invokedBy NOT EXISTS && $.eventType != \"AwsServiceEvent\" }"
 
-  name = "${local.name_prefix}-lambda-cloudtrail-role"
+  metric_transformation {
+    name      = "RootUsage"
+    namespace = "CloudTrailMetrics"
+    value     = "1"
+  }
+}
 
-  assume_role_policy = jsonencode({
-    Version = "2012-10-17"
-    Statement = [
-      {
-        Action = "sts:AssumeRole"
-        Effect = "Allow"
-        Principal = {
-          Service = "lambda.amazonaws.com"
-        }
-      }
-    ]
-  })
+# CloudWatch Alarms for security events (optional)
+resource "aws_cloudwatch_metric_alarm" "console_login_failures" {
+  count               = var.enable_metric_filters ? 1 : 0
+  alarm_name          = "${var.trail_name}-console-login-failures"
+  comparison_operator = "GreaterThanOrEqualToThreshold"
+  evaluation_periods  = "1"
+  metric_name         = "ConsoleLoginFailures"
+  namespace           = "CloudTrailMetrics"
+  period              = "300"
+  statistic           = "Sum"
+  threshold           = "3"
+  alarm_description   = "Multiple console login failures detected"
+  alarm_actions       = var.alarm_sns_topic_arn != null ? [var.alarm_sns_topic_arn] : []
 
   tags = var.tags
 }
 
-# IAM policy for Lambda
-resource "aws_iam_role_policy" "lambda_policy" {
-  count = var.enable_session_tracking ? 1 : 0
+resource "aws_cloudwatch_metric_alarm" "root_usage" {
+  count               = var.enable_metric_filters ? 1 : 0
+  alarm_name          = "${var.trail_name}-root-usage"
+  comparison_operator = "GreaterThanOrEqualToThreshold"
+  evaluation_periods  = "1"
+  metric_name         = "RootUsage"
+  namespace           = "CloudTrailMetrics"
+  period              = "300"
+  statistic           = "Sum"
+  threshold           = "1"
+  alarm_description   = "Root account usage detected"
+  alarm_actions       = var.alarm_sns_topic_arn != null ? [var.alarm_sns_topic_arn] : []
 
-  name = "${local.name_prefix}-lambda-cloudtrail-policy"
-  role = aws_iam_role.lambda_role[0].id
-
-  policy = jsonencode({
-    Version = "2012-10-17"
-    Statement = [
-      {
-        Effect = "Allow"
-        Action = [
-          "logs:CreateLogGroup",
-          "logs:CreateLogStream",
-          "logs:PutLogEvents"
-        ]
-        Resource = "arn:aws:logs:*:*:*"
-      },
-      {
-        Effect = "Allow"
-        Action = [
-          "dynamodb:PutItem",
-          "dynamodb:UpdateItem",
-          "dynamodb:GetItem",
-          "dynamodb:Query"
-        ]
-        Resource = aws_dynamodb_table.user_sessions[0].arn
-      }
-    ]
-  })
-}
-
-# CloudWatch Log Stream trigger for Lambda
-resource "aws_cloudwatch_log_subscription_filter" "cloudtrail_filter" {
-  count = var.enable_session_tracking ? 1 : 0
-
-  name            = "${local.name_prefix}-cloudtrail-filter"
-  log_group_name  = aws_cloudwatch_log_group.cloudtrail.name
-  filter_pattern  = "[timestamp, request_id, event_name=\"ConsoleLogin\" || event_name=\"AssumeRole\" || event_name=\"GetSessionToken\"]"
-  destination_arn = aws_lambda_function.cloudtrail_processor[0].arn
-}
-
-# Permission for CloudWatch Logs to invoke Lambda
-resource "aws_lambda_permission" "allow_cloudwatch" {
-  count = var.enable_session_tracking ? 1 : 0
-
-  statement_id  = "AllowExecutionFromCloudWatchLogs"
-  action        = "lambda:InvokeFunction"
-  function_name = aws_lambda_function.cloudtrail_processor[0].function_name
-  principal     = "logs.amazonaws.com"
-  source_arn    = "${aws_cloudwatch_log_group.cloudtrail.arn}:*"
+  tags = var.tags
 }

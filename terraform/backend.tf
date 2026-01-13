@@ -1,15 +1,33 @@
-# Backend configuration for remote state storage
+# S3 Backend Configuration (No DynamoDB locking as requested)
 terraform {
   backend "s3" {
-    # Configure these values according to your setup
-    bucket = "infra-terraform-01"
-   
-    region = "us-east-1"
+    bucket         = "infra-terraform-01"
+    key            = "hello-world.tfstate"
+    region         = "us-east-1"
+    encrypt        = true
+  }
 
-    # Encryption at rest
-    encrypt = true
+  required_version = ">= 1.5"
+  required_providers {
+    aws = {
+      source  = "hashicorp/aws"
+      version = "~> 5.0"
+    }
+    random = {
+      source  = "hashicorp/random"
+      version = "~> 3.4"
+    }
+    tls = {
+      source  = "hashicorp/tls"
+      version = "~> 4.0"
+    }
+  }
+}
 
-    # Note: DynamoDB table for state locking is intentionally omitted
-    # as per requirements
+provider "aws" {
+  region = var.aws_region
+
+  default_tags {
+    tags = var.default_tags
   }
 }
