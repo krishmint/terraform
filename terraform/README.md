@@ -28,35 +28,20 @@ The infrastructure includes:
    cd terraform/
    ```
 
-2. **Update backend configuration:**
-   Edit `backend.tf` and update the S3 bucket name and region:
-   ```hcl
-   terraform {
-     backend "s3" {
-       bucket = "your-terraform-state-bucket"  # Update this
-       key    = "infrastructure/terraform.tfstate"
-       region = "us-west-2"                    # Update this
-       encrypt = true
-     }
-   }
-   ```
+
 
 3. **Customize variables:**
-   Edit `terraform.tfvars` to match your requirements:
+   Edit `dev/prod/stage.tfvars` inside "env folder" to match your requirements:
    ```hcl
    environment  = "staging"  # or "prod"
    project_name = "webapp"
    aws_region   = "us-west-2"
-   
-   # Enable WAF if needed
-   enable_waf = true
-   ```
 
 4. **Initialize and apply:**
    ```bash
    terraform init
-   terraform plan
-   terraform apply
+   terraform plan -var-file=env/dev.tfvars
+   terraform apply -var-file=env/dev.tfvars
    ```
 
 ## Module Structure
