@@ -2,7 +2,8 @@
 terraform {
   backend "s3" {
     bucket         = "infra-terraform-01"
-    key            = "hello-world.tfstate"
+    key            = "infra/terraform.tfstate"  
+    use_lockfile   = true         ## new feature of terraform to lock state file without use of dynabodb
     region         = "us-east-1"
     encrypt        = true
   }
