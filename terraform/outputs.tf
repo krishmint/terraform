@@ -1,5 +1,5 @@
 # =============================================================================
-# OUTPUTS
+# OUTPUTS (this out is only used to show values to the user after 'apply', not to pass values between modules)
 # =============================================================================
 
 # VPC Outputs

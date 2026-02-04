@@ -44,15 +44,15 @@ key_pair_config = {
   s3_key_prefix   = "ssh-keys"
 }
 
-# EC2 Configuration
-ec2_config = {
-  instance_type               = "t3.micro"
-  ami_id                     = "ami-05f991c49d264708f" # Ubuntu 24.04
-  root_volume_size           = 8
-  root_volume_type           = "gp3"
-  root_volume_encrypted      = true
-  enable_detailed_monitoring = false
-}
+# # EC2 Configuration
+# ec2_config = {
+#   instance_type               = "t3.micro"
+#   ami_id                     = "ami-05f991c49d264708f" # Ubuntu 24.04
+#   root_volume_size           = 8
+#   root_volume_type           = "gp3"
+#   root_volume_encrypted      = true
+#   enable_detailed_monitoring = false
+# }
 
 # Auto Scaling Configuration
 autoscaling_config = {

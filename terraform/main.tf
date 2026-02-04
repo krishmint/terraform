@@ -72,7 +72,7 @@ module "ec2" {
   count  = var.enable_features.ec2 ? 1 : 0
   source = "./modules/ec2"
 
-  name_prefix                     = "eventpower.com"  
+  
   ec2_configs = {
     event-app = {
       name_prefix                 = "app1"

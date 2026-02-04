@@ -102,20 +102,23 @@ variable "key_pair_config" {
 }
 
 # =============================================================================
-# EC2 CONFIGURATION
+# EC2 CONFIGURATION  ## NOT required
+  
+  ##"ec2_config" varibale is not required as we are passing values directly in main.tf 
+ ## we are passing values 2 times as in ec2 baby module we are using for each 
 # =============================================================================
 
-variable "ec2_config" {
-  description = "EC2 instance configuration"
-  type = object({
-    instance_type          = string
-    ami_id                 = string
-    root_volume_size       = number
-    root_volume_type       = string
-    root_volume_encrypted  = bool
-    enable_detailed_monitoring = bool
-  })
-}
+# variable "ec2_config" {
+#   description = "EC2 instance configuration"
+#   type = object({
+#     instance_type          = string
+#     ami_id                 = string
+#     root_volume_size       = number
+#     root_volume_type       = string
+#     root_volume_encrypted  = bool
+#     enable_detailed_monitoring = bool
+#   })
+# }
 
 # =============================================================================
 # AUTO SCALING CONFIGURATION
