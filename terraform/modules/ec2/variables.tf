@@ -18,7 +18,7 @@ variable "ec2_configs" {
 }
 
 
-variable "name_prefix " {
+variable "name_prefix" {
   description = "User data script"
   type        = string
   default     = null

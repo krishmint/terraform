@@ -1,12 +1,14 @@
 # S3 Backend Configuration (No DynamoDB locking as requested)
 terraform {
   backend "s3" {
-    bucket         = var.backend_bucket_name  
-    key            = var.backend_key
+    bucket         = "terra-state-bucket-krish" ## varibale cannot be used as terraform {} block (where you define the backend) 
+                                                ## is processed before any variables are loaded  
+    key            = "dev/terraform.tfstate"
     use_lockfile   = true         ## new feature of terraform to lock state file without use of dynabodb
-    region         = var.backend_region
+    region         = "ap-south-1"
     encrypt        = true
   }
+
 
 ### TERRFAORM BLOCK
   required_version = ">= 1.5"

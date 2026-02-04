@@ -116,8 +116,8 @@ module "autoscaling" {
   source = "./modules/autoscaling"
 
   name_prefix                = local.name_prefix
-  ami_id                     = var.ec2_config.ami_id
-  instance_type              = var.ec2_config.instance_type
+  ami_id                     = "ami-05f991c49d264708f"
+  instance_type              = "t2.micro"
   key_name                   = var.enable_features.key_pair ? module.key_pair[0].key_name : null
   security_group_ids         = var.enable_features.vpc ? [module.security_groups[0].security_group_ids["ec2"]] : []
   subnet_ids                 = var.enable_features.vpc ? module.vpc[0].private_subnet_ids : []
@@ -131,9 +131,9 @@ module "autoscaling" {
   default_cooldown           = var.autoscaling_config.default_cooldown
   instance_warmup            = var.autoscaling_config.instance_warmup
   enabled_metrics            = var.autoscaling_config.enabled_metrics
-  root_volume_size           = var.ec2_config.root_volume_size
-  root_volume_type           = var.ec2_config.root_volume_type
-  root_volume_encrypted      = var.ec2_config.root_volume_encrypted
+  root_volume_size           = 8
+  root_volume_type           = "gp3"
+  root_volume_encrypted      = true
   tags                       = local.common_tags
 
   depends_on = [module.vpc, module.security_groups, module.iam, module.load_balancer]

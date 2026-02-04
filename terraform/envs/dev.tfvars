@@ -1,20 +1,15 @@
 environment    = "dev"
 project_name   = "rocketscience"
-aws_region     = "us-west-2"
-availability_zones = ["us-west-2a", "us-west-2b", "us-west-2c"]
+aws_region     = "ap-south-1"
+availability_zones = ["ap-south-1a", "ap-south-1b", "ap-south-1c"]
 
-# Backend Configuration
-backend_bucket_name = "myapp-terraform-state-dev"
-backend_key        = "dev/terraform.tfstate"
-backend_region     = "us-west-2"
+
 
 # Default Tags
 default_tags = {
   Environment = "dev"
-  Project     = "rocketject"
+  Project     = "rocketscience"
   ManagedBy   = "Terraform"
-  Owner       = "DevOps Team"
-  CostCenter  = "Engineering"
 }
 
 additional_tags = {
@@ -26,8 +21,8 @@ vpc_config = {
   cidr_block           = "10.0.0.0/16"
   enable_dns_hostnames = true
   enable_dns_support   = true
-  enable_nat_gateway   = true
-  single_nat_gateway   = true
+  enable_nat_gateway   = false
+  single_nat_gateway   = false
 }
 
 subnet_config = {
@@ -38,7 +33,7 @@ subnet_config = {
 
 # Key Pair Configuration
 key_pair_config = {
-  create_key_pair = true
+  create_key_pair = false
   key_name        = "myapp-dev-key"
   s3_bucket_name  = "myapp-dev-ssh-keys"
   s3_key_prefix   = "ssh-keys"
@@ -249,12 +244,12 @@ cloudtrail_config = {
 # Feature Flags
 enable_features = {
   vpc           = true
-  ec2           = true
+  ec2           = false
   autoscaling   = false
   load_balancer = false
   rds           = false
   backup        = false
   cloudtrail    = false
   waf           = false
-  key_pair      = true
+  key_pair      = false
 }
