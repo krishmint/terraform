@@ -212,7 +212,7 @@ resource "aws_route_table_association" "public" {
 
 # Private Route Table Associations
 resource "aws_route_table_association" "private" {
-  count = length(var.private_subnet_cidrs)
+  count = var.enable_nat_gateway ? length(var.private_subnet_cidrs) : 0
 
   subnet_id      = aws_subnet.private[count.index].id
   route_table_id = var.single_nat_gateway ? aws_route_table.private[0].id : aws_route_table.private[count.index].id

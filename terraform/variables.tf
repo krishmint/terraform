@@ -26,24 +26,7 @@ variable "availability_zones" {
   type        = list(string)
 }
 
-# =============================================================================
-# BACKEND CONFIGURATION
-# =============================================================================
 
-variable "backend_bucket_name" {
-  description = "S3 bucket name for Terraform state"
-  type        = string
-}
-
-variable "backend_key" {
-  description = "S3 key for Terraform state file"
-  type        = string
-}
-
-variable "backend_region" {
-  description = "AWS region for backend S3 bucket"
-  type        = string
-}
 
 # =============================================================================
 # TAGGING
