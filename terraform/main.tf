@@ -58,7 +58,7 @@ module "vpc" {
 
 
 module "security_groups" {
-  count  = var.enable_features.vpc ? 1 : 0
+  count  = var.enable_features.security_groups ? 1 : 0
   source = "./modules/security_group"
 
   name_prefix = local.name_prefix

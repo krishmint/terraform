@@ -256,6 +256,7 @@ variable "enable_features" {
   description = "Feature flags to enable/disable components"
   type = object({
     vpc                = bool
+    security_groups    = bool
     ec2                = bool
     autoscaling        = bool
     load_balancer      = bool
@@ -267,6 +268,7 @@ variable "enable_features" {
   })
   default = {
     vpc                = true
+    security_groups    = false
     ec2                = true
     autoscaling        = true
     load_balancer      = true

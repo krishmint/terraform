@@ -103,7 +103,7 @@ output "private_key_s3_location" {
 # Security Group Outputs
 output "security_group_ids" {
   description = "Map of security group IDs"
-  value       = var.enable_features.vpc ? module.security_groups[0].security_group_ids : {}
+  value       = var.enable_features.security_groups ? module.security_groups[0].security_group_ids : {}
 }
 
 # IAM Outputs

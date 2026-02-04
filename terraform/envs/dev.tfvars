@@ -244,6 +244,7 @@ cloudtrail_config = {
 # Feature Flags
 enable_features = {
   vpc           = true
+  security_groups = false
   ec2           = false
   autoscaling   = false
   load_balancer = false
