@@ -2,7 +2,7 @@ variable "ec2_configs" {
   description = "List of EC2 instance configurations"
 
   type                          = map(object({
-    
+    name_prefix                 = string
     ami_id                      = string
     instance_type               = string
     key_name                    = string
@@ -18,11 +18,11 @@ variable "ec2_configs" {
 }
 
 
-variable "name_prefix" {
-  description = "User data script"
-  type        = string
-  default     = null
-}
+# variable "name_prefix" {
+#   description = "User data script"
+#   type        = string
+#   default     = null
+# }
 
 variable "user_data" {
   description = "User data script"

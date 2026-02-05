@@ -24,18 +24,18 @@ output "public_key_openssh" {
   value       = tls_private_key.main.public_key_openssh
 }
 
-output "s3_bucket_name" {
-  description = "S3 bucket name where keys are stored"
-  value       = aws_s3_bucket.key_storage.id
-}
+# output "s3_bucket_name" {
+#   description = "S3 bucket name where keys are stored"
+#   value       = aws_s3_bucket.key_storage.id
+# }
 
-output "private_key_s3_location" {
-  description = "S3 location of the private key"
-  value       = "s3://${aws_s3_bucket.key_storage.id}/${aws_s3_object.private_key.key}"
-  sensitive   = true
-}
+# output "private_key_s3_location" {
+#   description = "S3 location of the private key"
+#   value       = "s3://${aws_s3_bucket.key_storage.id}/${aws_s3_object.private_key.key}"
+#   sensitive   = true
+# }
 
-output "public_key_s3_location" {
-  description = "S3 location of the public key"
-  value       = "s3://${aws_s3_bucket.key_storage.id}/${aws_s3_object.public_key.key}"
-}
+# output "public_key_s3_location" {
+#   description = "S3 location of the public key"
+#   value       = "s3://${aws_s3_bucket.key_storage.id}/${aws_s3_object.public_key.key}"
+# }

@@ -9,7 +9,6 @@ variable "vpc_id" {
 }
 
 variable "rules" {
-  description = "Security group rules configuration"
   type = map(object({
     description = string
     ingress_rules = list(object({

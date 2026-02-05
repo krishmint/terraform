@@ -18,8 +18,13 @@ terraform {
     }
 
     tls = {
-      source  = "hashicorp/tls"
+      source  = "hashicorp/tls"  ## this provier is req to craete key pair for ec2 instance
       version = "~> 4.0"
+    }
+
+    local = {
+      source  = "hashicorp/local"
+      version = "~> 2.0"
     }
   }
 }

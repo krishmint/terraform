@@ -28,10 +28,10 @@ output "public_dns" {
   value       = { for k, v in aws_instance.main : k => v.public_dns }
 }
 
-output "elastic_ip" {
-  description = "Elastic IP address (if created)"
-  value       = var.create_eip ? aws_eip.main[0].public_ip : null
-}
+# output "elastic_ip" {
+#   description = "Elastic IP address (if created)"
+#   value       = var.create_eip ? aws_eip.main[0].public_ip : null
+# }
 
 output "availability_zone" {
   description = "Availability zone of the instance"

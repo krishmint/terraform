@@ -20,7 +20,7 @@ resource "aws_instance" "main" {
     tags = merge(
       var.tags,
       {
-        Name = "${each.key}-${var.name_prefix}-root-volume"
+        Name = "${each.key}-${each.value.name_prefix}-root-volume"
       }
     )
   }
@@ -35,26 +35,26 @@ resource "aws_instance" "main" {
   tags = merge(
     var.tags,
     {
-      Name = "${each.key}-${var.name_prefix}"
+      Name = "${each.key}-${each.value.name_prefix}-"
     }
   )
 }
 
-# Elastic IP (optional)
-resource "aws_eip" "main" {
-  count = var.create_eip ? 1 : 0
+# # Elastic IP (optional)
+# resource "aws_eip" "main" {
+#   count = var.create_eip ? 1 : 0
 
-  instance = { for k, v in aws_instance.main : k => v.id }
-  domain   = "vpc"
+#   instance = { for k, v in aws_instance.main : k => v.id }
+#   domain   = "vpc"
 
-  lifecycle {
-    prevent_destroy = false
-  }
+#   lifecycle {
+#     prevent_destroy = false
+#   }
 
-  tags = merge(
-    var.tags,
-    {
-      Name = "${var.name_prefix}-eip"
-    }
-  )
-}
+#   tags = merge(
+#     var.tags,
+#     {
+#       Name = "${var.name_prefix}-eip"
+#     }
+#   )
+# }

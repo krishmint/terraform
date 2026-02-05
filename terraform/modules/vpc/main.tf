@@ -162,7 +162,7 @@ resource "aws_route_table" "public" {
 
 # Private Route Tables
 resource "aws_route_table" "private" {
-  count = var.enable_nat_gateway ? (var.single_nat_gateway ? 1 : length(var.availability_zones)) : 1
+  count = var.enable_nat_gateway ? (var.single_nat_gateway ? 1 : length(var.availability_zones)) : 0
 
   vpc_id = aws_vpc.main.id
 
@@ -215,7 +215,7 @@ resource "aws_route_table_association" "private" {
   count = var.enable_nat_gateway ? length(var.private_subnet_cidrs) : 0
 
   subnet_id      = aws_subnet.private[count.index].id
-  route_table_id = var.single_nat_gateway ? aws_route_table.private[0].id : aws_route_table.private[count.index].id
+  route_table_id = var.enable_nat_gateway ? (var.single_nat_gateway ? aws_route_table.private[0].id : aws_route_table.private[count.index].id) : null
 }
 
 # Database Route Table Associations

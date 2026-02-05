@@ -103,34 +103,34 @@ rds_database_config = {
 
 # Security Group Rules
 security_group_rules = {
-  web = {
-    description = "Web server security group"
-    ingress_rules = [
-      {
-        from_port   = 80
-        to_port     = 80
-        protocol    = "tcp"
-        cidr_blocks = ["0.0.0.0/0"]
-        description = "HTTP from anywhere"
-      },
-      {
-        from_port   = 443
-        to_port     = 443
-        protocol    = "tcp"
-        cidr_blocks = ["0.0.0.0/0"]
-        description = "HTTPS from anywhere"
-      }
-    ]
-    egress_rules = [
-      {
-        from_port   = 0
-        to_port     = 0
-        protocol    = "-1"
-        cidr_blocks = ["0.0.0.0/0"]
-        description = "All outbound traffic"
-      }
-    ]
-  }
+  # web = {
+  #   description = "Web server security group"
+  #   ingress_rules = [
+  #     {
+  #       from_port   = 80
+  #       to_port     = 80
+  #       protocol    = "tcp"
+  #       cidr_blocks = ["0.0.0.0/0"]
+  #       description = "HTTP from anywhere"
+  #     },
+  #     {
+  #       from_port   = 443
+  #       to_port     = 443
+  #       protocol    = "tcp"
+  #       cidr_blocks = ["0.0.0.0/0"]
+  #       description = "HTTPS from anywhere"
+  #     }
+  #   ]
+  #   egress_rules = [
+  #     {
+  #       from_port   = 0
+  #       to_port     = 0
+  #       protocol    = "-1"
+  #       cidr_blocks = ["0.0.0.0/0"]
+  #       description = "All outbound traffic"
+  #     }
+  #   ]
+  # }
   ec2 = {
     description = "EC2 instances security group"
     ingress_rules = [
@@ -159,48 +159,48 @@ security_group_rules = {
       }
     ]
   }
-  alb = {
-    description = "Application Load Balancer security group"
-    ingress_rules = [
-      {
-        from_port   = 80
-        to_port     = 80
-        protocol    = "tcp"
-        cidr_blocks = ["0.0.0.0/0"]
-        description = "HTTP from anywhere"
-      },
-      {
-        from_port   = 443
-        to_port     = 443
-        protocol    = "tcp"
-        cidr_blocks = ["0.0.0.0/0"]
-        description = "HTTPS from anywhere"
-      }
-    ]
-    egress_rules = [
-      {
-        from_port   = 0
-        to_port     = 0
-        protocol    = "-1"
-        cidr_blocks = ["0.0.0.0/0"]
-        description = "All outbound traffic"
-      }
-    ]
-  }
-  rds = {
-    description = "RDS database security group"
-    ingress_rules = [
-      {
-        from_port   = 3306
-        to_port     = 3306
-        protocol    = "tcp"
-        cidr_blocks = ["10.0.0.0/16"]
-        description = "MySQL from VPC"
-      }
-    ]
-    egress_rules = []
-  }
-}
+  # alb = {
+  #   description = "Application Load Balancer security group"
+  #   ingress_rules = [
+  #     {
+  #       from_port   = 80
+  #       to_port     = 80
+  #       protocol    = "tcp"
+  #       cidr_blocks = ["0.0.0.0/0"]
+  #       description = "HTTP from anywhere"
+  #     },
+  #     {
+  #       from_port   = 443
+  #       to_port     = 443
+  #       protocol    = "tcp"
+  #       cidr_blocks = ["0.0.0.0/0"]
+  #       description = "HTTPS from anywhere"
+  #     }
+  #   ]
+  #   egress_rules = [
+  #     {
+  #       from_port   = 0
+  #       to_port     = 0
+  #       protocol    = "-1"
+  #       cidr_blocks = ["0.0.0.0/0"]
+  #       description = "All outbound traffic"
+  #     }
+  #   ]
+  # }
+#   rds = {
+#     description = "RDS database security group"
+#     ingress_rules = [
+#       {
+#         from_port   = 3306
+#         to_port     = 3306
+#         protocol    = "tcp"
+#         cidr_blocks = ["10.0.0.0/16"]
+#         description = "MySQL from VPC"
+#       }
+#     ]
+#     egress_rules = []
+#   }
+ }
 
 # WAF Configuration
 waf_config = {
@@ -243,14 +243,15 @@ cloudtrail_config = {
 
 # Feature Flags
 enable_features = {
-  vpc           = true
-  security_groups = false
-  ec2           = false
-  autoscaling   = false
-  load_balancer = false
-  rds           = false
-  backup        = false
-  cloudtrail    = false
-  waf           = false
-  key_pair      = false
+  iam             = true
+  vpc             = true
+  security_groups = true
+  ec2             = true
+  key_pair        = true
+  autoscaling     = false
+  load_balancer   = false
+  rds             = false
+  backup          = false
+  cloudtrail      = false
+  waf             = false  
 }

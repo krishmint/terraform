@@ -18,6 +18,7 @@ data "aws_region" "current" {}
 
 
 module "iam" {
+  count  = var.enable_features.iam ? 1 : 0
   source = "./modules/iam"
 
   project_name = var.project_name
@@ -80,8 +81,8 @@ module "ec2" {
       instance_type               = "t2.micro"
       key_name                    = var.enable_features.key_pair ? module.key_pair[0].key_name : null
       subnet_id                   = var.enable_features.vpc ? module.vpc[0].public_subnet_ids[0] : null
-      vpc_security_group_ids      = var.enable_features.vpc ? [module.security_groups[0].security_group_ids["ec2"]] : []
-      iam_instance_profile        = module.iam.ec2_instance_profile_name
+      vpc_security_group_ids      = var.enable_features.security_groups ? [module.security_groups[0].security_group_ids["ec2"]] : []
+      iam_instance_profile        = module.iam[0].ec2_instance_profile_name
       associate_public_ip_address = true
       root_volume_size            = 8
       root_volume_type            = "gp3"
@@ -89,20 +90,20 @@ module "ec2" {
       enable_detailed_monitoring  = false
     },
 
-    ep-api = {
-      name_prefix                 = "app1"
-      ami_id                      = "ami-05f991c49d264708f"
-      instance_type               = "t2.micro"
-      key_name                    = var.enable_features.key_pair ? module.key_pair[0].key_name : null
-      subnet_id                   = var.enable_features.vpc ? module.vpc[0].public_subnet_ids[0] : null
-      vpc_security_group_ids      = var.enable_features.vpc ? [module.security_groups[0].security_group_ids["ec2"]] : []
-      iam_instance_profile        = module.iam.ec2_instance_profile_name
-      associate_public_ip_address = true
-      root_volume_size            = 8
-      root_volume_type            = "gp3"
-      root_volume_encrypted       = true
-      enable_detailed_monitoring  = false
-    }
+    # ep-api = {
+    #   name_prefix                 = "app1"
+    #   ami_id                      = "ami-05f991c49d264708f"
+    #   instance_type               = "t2.micro"
+    #   key_name                    = var.enable_features.key_pair ? module.key_pair[0].key_name : null
+    #   subnet_id                   = var.enable_features.vpc ? module.vpc[0].public_subnet_ids[0] : null
+    #   vpc_security_group_ids      = var.enable_features.vpc ? [module.security_groups[0].security_group_ids["ec2"]] : []
+    #   iam_instance_profile        = module.iam[0].ec2_instance_profile_name
+    #   associate_public_ip_address = true
+    #   root_volume_size            = 8
+    #   root_volume_type            = "gp3"
+    #   root_volume_encrypted       = true
+    #   enable_detailed_monitoring  = false
+    # }
   }
 
   tags                     = local.common_tags
@@ -122,7 +123,7 @@ module "autoscaling" {
   security_group_ids         = var.enable_features.vpc ? [module.security_groups[0].security_group_ids["ec2"]] : []
   subnet_ids                 = var.enable_features.vpc ? module.vpc[0].private_subnet_ids : []
   target_group_arns          = var.enable_features.load_balancer ? [module.load_balancer[0].target_group_arn] : []
-  iam_instance_profile       = module.iam.ec2_instance_profile_name
+  iam_instance_profile       = module.iam[0].ec2_instance_profile_name
   min_size                   = var.autoscaling_config.min_size
   max_size                   = var.autoscaling_config.max_size
   desired_capacity           = var.autoscaling_config.desired_capacity
@@ -197,7 +198,7 @@ module "backup" {
   vault_name           = var.backup_config.backup_vault_name
   plan_name            = var.backup_config.backup_plan_name
   backup_rules         = var.backup_config.rules
-  iam_role_arn         = module.iam.backup_role_arn
+  iam_role_arn         = try(module.iam[0].backup_role_arn, null)
   project_name         = var.project_name
   environment          = var.environment
   tags                 = local.common_tags
@@ -218,7 +219,7 @@ module "backup" {
 #  enable_log_file_validation          = var.cloudtrail_config.enable_log_file_validation
 #  event_selector_read_write_type      = var.cloudtrail_config.event_selector_read_write_type
 #  event_selector_include_management_events = var.cloudtrail_config.event_selector_include_management_events
-#  cloudtrail_role_arn                 = module.iam.cloudtrail_role_arn
+#  cloudtrail_role_arn                 = module.iam[0].cloudtrail_role_arn
 #  project_name                        = var.project_name
 #  environment                         = var.environment
 #  tags                                = local.common_tags

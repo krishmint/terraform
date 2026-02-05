@@ -8,27 +8,27 @@ output "ec2_instance_profile_name" {
   value       = aws_iam_instance_profile.ec2_profile.name
 }
 
-output "backup_role_arn" {
-  description = "ARN of the backup role"
-  value       = aws_iam_role.backup_role.arn
-}
+# output "backup_role_arn" {
+#   description = "ARN of the backup role"
+#   value       = aws_iam_role.backup_role.arn
+# }
 
-output "cloudtrail_role_arn" {
-  description = "ARN of the CloudTrail role"
-  value       = aws_iam_role.cloudtrail_role.arn
-}
+# output "cloudtrail_role_arn" {
+#   description = "ARN of the CloudTrail role"
+#   value       = aws_iam_role.cloudtrail_role.arn
+# }
 
-output "cloudwatch_role_arn" {
-  description = "ARN of the CloudWatch role"
-  value       = aws_iam_role.cloudwatch_role.arn
-}
+# output "cloudwatch_role_arn" {
+#   description = "ARN of the CloudWatch role"
+#   value       = aws_iam_role.cloudwatch_role.arn
+# }
 
-output "developers_group_name" {
-  description = "Name of the developers group"
-  value       = aws_iam_group.developers.name
-}
+# output "developers_group_name" {
+#   description = "Name of the developers group"
+#   value       = aws_iam_group.developers.name
+# }
 
-output "operators_group_name" {
-  description = "Name of the operators group"
-  value       = aws_iam_group.operators.name
-}
+# output "operators_group_name" {
+#   description = "Name of the operators group"
+#   value       = aws_iam_group.operators.name
+# }

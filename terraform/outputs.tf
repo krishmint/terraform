@@ -34,10 +34,10 @@ output "ec2_instance_id" {
   value       = var.enable_features.ec2 ? module.ec2[0].instance_id : null
 }
 
-output "ec2_instance_public_ip" {
-  description = "Public IP of the EC2 instance"
-  value       = var.enable_features.ec2 ? module.ec2[0].public_ip : null
-}
+# output "ec2_instance_public_ip" {
+#   description = "Public IP of the EC2 instance"
+#   value       = var.enable_features.ec2 ? module.ec2[0].public_ip : null
+# }
 
 output "ec2_instance_private_ip" {
   description = "Private IP of the EC2 instance"
@@ -94,11 +94,11 @@ output "key_pair_name" {
   value       = var.enable_features.key_pair ? module.key_pair[0].key_name : null
 }
 
-output "private_key_s3_location" {
-  description = "S3 location of the private key"
-  value       = var.enable_features.key_pair ? module.key_pair[0].private_key_s3_location : null
-  sensitive   = true
-}
+# output "private_key_s3_location" {
+#   description = "S3 location of the private key"
+#   value       = var.enable_features.key_pair ? module.key_pair[0].private_key_s3_location : null
+#   sensitive   = true
+# }
 
 # Security Group Outputs
 output "security_group_ids" {
@@ -109,12 +109,12 @@ output "security_group_ids" {
 # IAM Outputs
 output "ec2_instance_profile_name" {
   description = "Name of the EC2 instance profile"
-  value       = module.iam.ec2_instance_profile_name
+  value       = length(module.iam) > 0 ? module.iam[0].ec2_instance_profile_name : null
 }
 
 output "backup_role_arn" {
   description = "ARN of the backup role"
-  value       = module.iam.backup_role_arn
+  value       = length(module.iam) > 0 ? try(module.iam[0].backup_role_arn, null) : null
 }
 
 # Backup Outputs

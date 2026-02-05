@@ -175,7 +175,6 @@ variable "rds_database_config" {
 # =============================================================================
 
 variable "security_group_rules" {
-  description = "Security group rules configuration"
   type = map(object({
     description = string
     ingress_rules = list(object({
@@ -255,6 +254,7 @@ variable "cloudtrail_config" {
 variable "enable_features" {
   description = "Feature flags to enable/disable components"
   type = object({
+    iam                = bool
     vpc                = bool
     security_groups    = bool
     ec2                = bool
@@ -267,8 +267,9 @@ variable "enable_features" {
     key_pair           = bool
   })
   default = {
+    iam                = true
     vpc                = true
-    security_groups    = false
+    security_groups    = true
     ec2                = true
     autoscaling        = true
     load_balancer      = true

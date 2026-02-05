@@ -2,9 +2,10 @@
 resource "aws_security_group" "main" {
   for_each = var.rules
 
-  name_prefix = "${var.name_prefix}-${each.key}-"
-  description = each.value.description
+  name_prefix = "${var.name_prefix}-${each.key}"
   vpc_id      = var.vpc_id
+  
+  description = each.value.description
 
   dynamic "ingress" {
     for_each = each.value.ingress_rules
